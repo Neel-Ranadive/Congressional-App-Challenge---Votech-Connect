@@ -1,28 +1,75 @@
-# Congressional-App-Challenge---Votech-Connect
-# 🛠️ VoTech Connect - Internal Dev Checklist
+# React + TypeScript + Vite
 
-## ⚙️ Environment Variables (.env.local)
-- [ ] 🔑 `VITE_SUPABASE_URL` / `VITE_FIREBASE_API_KEY`
-- [ ] 🔐 `VITE_SUPABASE_ANON_KEY` / `VITE_FIREBASE_PROJECT_ID`
-- [ ] 🏫 `GOOGLE_CLASSROOM_CLIENT_ID`
+This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
 
----
+Currently, two official plugins are available:
 
-## 🎯 Active Coding Tasks
+- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
+- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
 
-### Phase 1: Models & Database Connection 🏗️
-- [ ] 📄 `src/types/models.ts`: Write TypeScript interfaces for `User`, `Project`, and `TradeType`.
-- [ ] 🔌 `src/lib/dbClient.js`: Initialize connection client and export database instance.
+## React Compiler
 
-### Phase 2: Auth & Role Routing 🔑
-- [ ] 🛡️ `src/context/AuthContext.jsx`: Build session provider and `@mcvts.org` domain filter.
-- [ ] 🚦 `src/components/ProtectedRoute.jsx`: Add role guards for `STUDENT`, `RESIDENT`, and `TEACHER`.
+The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
 
-### Phase 3: Matching Engine & APIs 🧮
-- [ ] ⚡ `src/lib/bitmaskEngine.js`: Code 24-bit binary AND schedule matching logic.
-- [ ] 🔗 `src/lib/googleClassroom.js`: Add OAuth flow and assignment sync helpers.
+## Expanding the ESLint configuration
 
-### Phase 4: Hub Dashboards 📱
-- [ ] 👴 `src/pages/SeniorDashboard.jsx`: High-contrast icon category selector.
-- [ ] 🎓 `src/pages/StudentDashboard.jsx`: Field hour counter & portfolio display.
-- [ ] 🧑‍🏫 `src/pages/TeacherDashboard.jsx`: Safety check-stops & approval queue.
+If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+
+```js
+export default defineConfig([
+  globalIgnores(['dist']),
+  {
+    files: ['**/*.{ts,tsx}'],
+    extends: [
+      // Other configs...
+
+      // Remove tseslint.configs.recommended and replace with this
+      tseslint.configs.recommendedTypeChecked,
+      // Alternatively, use this for stricter rules
+      tseslint.configs.strictTypeChecked,
+      // Optionally, add this for stylistic rules
+      tseslint.configs.stylisticTypeChecked,
+
+      // Other configs...
+    ],
+    languageOptions: {
+      parserOptions: {
+        project: ['./tsconfig.node.json', './tsconfig.app.json'],
+        tsconfigRootDir: import.meta.dirname,
+      },
+      // other options...
+    },
+  },
+])
+
+```
+
+You can also install [eslint-plugin-react-x](https://npmx.dev/package/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://npmx.dev/package/eslint-plugin-react-dom) for React-specific lint rules:
+
+```js
+// eslint.config.js
+import reactX from 'eslint-plugin-react-x'
+import reactDom from 'eslint-plugin-react-dom'
+
+export default defineConfig([
+  globalIgnores(['dist']),
+  {
+    files: ['**/*.{ts,tsx}'],
+    extends: [
+      // Other configs...
+      // Enable lint rules for React
+      reactX.configs['recommended-typescript'],
+      // Enable lint rules for React DOM
+      reactDom.configs.recommended,
+    ],
+    languageOptions: {
+      parserOptions: {
+        project: ['./tsconfig.node.json', './tsconfig.app.json'],
+        tsconfigRootDir: import.meta.dirname,
+      },
+      // other options...
+    },
+  },
+])
+
+```
