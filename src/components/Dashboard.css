@@ -1,0 +1,378 @@
+.dashboard-page {
+  min-height: 100vh;
+  background: #f8faf9;
+}
+
+.dashboard-header {
+  display: flex;
+  min-height: 76px;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 clamp(22px, 7vw, 88px);
+  border-bottom: 1px solid #e3e9e4;
+  background: #fff;
+}
+
+.dashboard-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 11px;
+  color: #172522;
+  font-size: 15px;
+  letter-spacing: -0.02em;
+  text-decoration: none;
+}
+
+.dashboard-brand strong {
+  font-weight: 750;
+}
+
+.dashboard-brand-mark {
+  display: grid;
+  width: 34px;
+  height: 34px;
+  place-items: center;
+  border-radius: 10px;
+  background: #eaf1e7;
+  color: #24583f;
+  font-family: Georgia, serif;
+  font-size: 20px;
+  font-weight: 700;
+}
+
+.sign-out-button {
+  display: inline-flex;
+  min-height: 40px;
+  align-items: center;
+  gap: 8px;
+  padding: 0 12px;
+  border: 1px solid #dce4dd;
+  border-radius: 8px;
+  background: #fff;
+  color: #35443c;
+  cursor: pointer;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.sign-out-button:hover:not(:disabled) {
+  background: #f3f7f3;
+}
+
+.sign-out-button:disabled {
+  cursor: wait;
+  opacity: 0.7;
+}
+
+.dashboard-content {
+  width: min(100% - 48px, 880px);
+  margin: 0 auto;
+  padding: clamp(54px, 9vw, 100px) 0;
+}
+
+.dashboard-kicker {
+  margin: 0 0 12px;
+  color: #42785c;
+  font-size: 12px;
+  font-weight: 750;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.dashboard-content h1 {
+  margin: 0;
+  color: #172522;
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: clamp(36px, 6vw, 54px);
+  font-weight: 400;
+  letter-spacing: -0.05em;
+  line-height: 1.1;
+}
+
+.dashboard-description {
+  max-width: 600px;
+  margin: 16px 0 0;
+  color: #6a7771;
+  font-size: 16px;
+  line-height: 1.7;
+}
+
+.dashboard-next {
+  margin-top: 38px;
+  padding: 24px;
+  border: 1px solid #e3e9e4;
+  border-radius: 14px;
+  background: #fff;
+  box-shadow: 0 12px 32px rgb(28 59 41 / 5%);
+}
+
+.dashboard-role {
+  display: inline-flex;
+  padding: 5px 10px;
+  border-radius: 999px;
+  background: #eaf1e7;
+  color: #24583f;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: capitalize;
+}
+
+.dashboard-next p {
+  margin: 16px 0 0;
+  color: #53635a;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.dashboard-next .dashboard-trade {
+  margin-top: 14px;
+  color: #35443c;
+  font-weight: 650;
+}
+
+.dashboard-error {
+  margin: 18px 0 0;
+  color: #a73c2d;
+  font-size: 14px;
+}
+
+.teacher-review {
+  margin-top: 38px;
+}
+
+.review-toolbar,
+.review-toolbar > p,
+.review-refresh,
+.review-card-topline,
+.review-category,
+.review-detail,
+.review-approve {
+  display: flex;
+  align-items: center;
+}
+
+.review-toolbar {
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 18px;
+}
+
+.review-toolbar > p {
+  gap: 8px;
+  margin: 0;
+  color: #35443c;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.review-toolbar > p svg {
+  color: #42785c;
+}
+
+.review-refresh {
+  min-height: 38px;
+  justify-content: center;
+  gap: 7px;
+  padding: 0 11px;
+  border: 1px solid #dce4dd;
+  border-radius: 8px;
+  background: #fff;
+  color: #35443c;
+  cursor: pointer;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 650;
+}
+
+.review-refresh:disabled {
+  cursor: wait;
+  opacity: 0.65;
+}
+
+.review-message {
+  margin: 0 0 16px;
+  padding: 11px 13px;
+  border-radius: 8px;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.review-error {
+  background: #fff0ed;
+  color: #a73c2d;
+}
+
+.review-success {
+  background: #edf6ee;
+  color: #2e6945;
+}
+
+.review-columns {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  align-items: start;
+  gap: 22px;
+}
+
+.review-section {
+  min-width: 0;
+}
+
+.review-section-heading {
+  display: flex;
+  min-height: 58px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 13px;
+}
+
+.review-section-label {
+  margin: 0 0 4px;
+  color: #728078;
+  font-size: 10px;
+  font-weight: 750;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.review-section-heading h2 {
+  margin: 0;
+  color: #20372b;
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: -0.035em;
+}
+
+.review-count {
+  display: grid;
+  min-width: 28px;
+  height: 28px;
+  place-items: center;
+  padding: 0 7px;
+  border-radius: 999px;
+  background: #eaf1e7;
+  color: #24583f;
+  font-size: 12px;
+  font-weight: 750;
+}
+
+.review-list {
+  display: grid;
+  gap: 12px;
+}
+
+.review-card,
+.review-empty {
+  padding: 17px;
+  border: 1px solid #e3e9e4;
+  border-radius: 12px;
+  background: #fff;
+}
+
+.review-empty {
+  margin: 0;
+  color: #728078;
+  font-size: 13px;
+  line-height: 1.55;
+}
+
+.review-card-topline {
+  justify-content: space-between;
+  gap: 9px;
+  margin-bottom: 12px;
+}
+
+.review-category {
+  min-width: 0;
+  gap: 5px;
+  padding: 4px 8px;
+  border-radius: 999px;
+  background: #eff4ed;
+  color: #386248;
+  font-size: 10px;
+  font-weight: 750;
+  line-height: 1.4;
+  text-transform: capitalize;
+}
+
+.review-date {
+  flex: 0 0 auto;
+  color: #849087;
+  font-size: 10px;
+}
+
+.review-card h3 {
+  margin: 0;
+  color: #20372b;
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.35;
+}
+
+.review-card-description {
+  margin: 8px 0 0;
+  color: #647269;
+  font-size: 12px;
+  line-height: 1.55;
+}
+
+.review-detail {
+  gap: 5px;
+  margin: 11px 0 0;
+  color: #647269;
+  font-size: 11px;
+}
+
+.review-detail svg {
+  flex: 0 0 auto;
+}
+
+.review-approve {
+  min-height: 38px;
+  justify-content: center;
+  gap: 7px;
+  margin-top: 15px;
+  padding: 0 11px;
+  border: 0;
+  border-radius: 7px;
+  background: #24583f;
+  color: #fff;
+  cursor: pointer;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.review-approve:hover:not(:disabled) {
+  background: #1b4832;
+}
+
+.review-approve:disabled {
+  cursor: wait;
+  opacity: 0.65;
+}
+
+@media (max-width: 480px) {
+  .dashboard-header {
+    min-height: 66px;
+    padding: 0 18px;
+  }
+
+  .sign-out-button {
+    padding: 0 9px;
+  }
+
+  .dashboard-content {
+    width: calc(100% - 36px);
+  }
+}
+
+@media (max-width: 760px) {
+  .review-columns {
+    grid-template-columns: 1fr;
+    gap: 26px;
+  }
+}
