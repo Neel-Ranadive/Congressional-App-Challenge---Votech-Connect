@@ -1,11 +1,11 @@
-export type UserRole = 'student' | 'resident' | 'teacher'
+export type UserRole = 'student' | 'resident' | 'teacher' | 'admin'
 
 export type ProjectStatus = 'pending' | 'approved' | 'in_progress' | 'completed'
 
 export type HourStatus = 'pending' | 'approved'
 
 export function isUserRole(value: unknown): value is UserRole {
-  return value === 'student' || value === 'resident' || value === 'teacher'
+  return value === 'student' || value === 'resident' || value === 'teacher' || value === 'admin'
 }
 
 export interface Profile {

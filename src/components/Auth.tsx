@@ -6,6 +6,8 @@ import './Auth.css'
 type AuthMode = 'sign-in' | 'sign-up'
 
 const STUDENT_EMAIL_DOMAIN = '@mcvts.org'
+const TEACHER_INVITE_CODE = (import.meta.env.VITE_TEACHER_INVITE_CODE ?? '').trim()
+const ADMIN_INVITE_CODE = (import.meta.env.VITE_ADMIN_INVITE_CODE ?? '').trim()
 
 function Auth() {
   const [mode, setMode] = useState<AuthMode>('sign-in')
@@ -14,6 +16,7 @@ function Auth() {
   const [fullName, setFullName] = useState('')
   const [role, setRole] = useState<UserRole>('student')
   const [tradeArea, setTradeArea] = useState('')
+  const [teacherInviteCode, setTeacherInviteCode] = useState('')
   const [errorMessage, setErrorMessage] = useState('')
   const [statusMessage, setStatusMessage] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -36,6 +39,30 @@ function Auth() {
     ) {
       setErrorMessage(`Student accounts must use an ${STUDENT_EMAIL_DOMAIN} email address.`)
       return
+    }
+
+    if (isSignUp && role === 'teacher') {
+      if (!TEACHER_INVITE_CODE) {
+        setErrorMessage('Teacher registrations are invite-only. Ask your district administrator to configure a teacher invite code.')
+        return
+      }
+
+      if (teacherInviteCode.trim() !== TEACHER_INVITE_CODE) {
+        setErrorMessage('The teacher invite code is invalid or expired.')
+        return
+      }
+    }
+
+    if (isSignUp && role === 'admin') {
+      if (!ADMIN_INVITE_CODE) {
+        setErrorMessage('Admin registrations are invite-only. Add VITE_ADMIN_INVITE_CODE to your environment before creating an admin account.')
+        return
+      }
+
+      if (teacherInviteCode.trim() !== ADMIN_INVITE_CODE) {
+        setErrorMessage('The admin invite code is invalid or expired.')
+        return
+      }
     }
 
     setIsSubmitting(true)
@@ -82,6 +109,7 @@ function Auth() {
 
   function changeMode(nextMode: AuthMode) {
     setMode(nextMode)
+    setTeacherInviteCode('')
     setErrorMessage('')
     setStatusMessage('')
   }
@@ -155,13 +183,17 @@ function Auth() {
                   <select
                     name="role"
                     onChange={(event) => {
-                      if (isUserRole(event.target.value)) setRole(event.target.value)
+                      if (isUserRole(event.target.value)) {
+                        setRole(event.target.value)
+                        setTeacherInviteCode('')
+                      }
                     }}
                     value={role}
                   >
                     <option value="student">Student</option>
                     <option value="resident">Resident</option>
                     <option value="teacher">Teacher</option>
+                    <option value="admin">Admin</option>
                   </select>
                 </label>
 
@@ -176,6 +208,34 @@ function Auth() {
                       required
                       value={tradeArea}
                     />
+                  </label>
+                )}
+
+                {(role === 'teacher' || role === 'admin') && (
+                  <label className="form-field">
+                    <span>{role === 'admin' ? 'Admin invite code' : 'Teacher invite code'}</span>
+                    <input
+                      autoComplete="off"
+                      name="teacher_invite"
+                      onChange={(event) => setTeacherInviteCode(event.target.value)}
+                      placeholder={
+                        role === 'admin'
+                          ? ADMIN_INVITE_CODE
+                            ? 'Enter the admin invite code'
+                            : 'Admin invite code not configured'
+                          : TEACHER_INVITE_CODE
+                            ? 'Enter your district invite code'
+                            : 'Invite code not configured'
+                      }
+                      required
+                      type="password"
+                      value={teacherInviteCode}
+                    />
+                    <span className="field-hint">
+                      {role === 'admin'
+                        ? 'Admin access is restricted to designated district operators.'
+                        : 'Teacher access is invite-only to keep district oversight and student safety in place.'}
+                    </span>
                   </label>
                 )}
               </>

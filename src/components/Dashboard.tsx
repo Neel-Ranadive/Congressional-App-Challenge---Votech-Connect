@@ -25,6 +25,11 @@ const dashboardDetails = {
     description: 'Review community projects and verify students’ field-hour submissions.',
     next: '',
   },
+  admin: {
+    label: 'Admin dashboard',
+    description: 'Review the full district operation, switch between role perspectives, and supervise every status transition.',
+    next: 'Use this view for district oversight and cross-role verification.',
+  },
 } as const
 
 function asRecord(value: unknown): Record<string, unknown> | null {
@@ -410,6 +415,7 @@ function TeacherReviewQueue({ teacherId }: TeacherReviewQueueProps) {
 function Dashboard({ profile, onSignOut }: DashboardProps) {
   const [signOutError, setSignOutError] = useState('')
   const [isSigningOut, setIsSigningOut] = useState(false)
+  const [adminView, setAdminView] = useState<'overview' | 'student' | 'resident' | 'teacher'>('overview')
   const details = dashboardDetails[profile.role]
 
   async function handleSignOut() {
@@ -459,6 +465,65 @@ function Dashboard({ profile, onSignOut }: DashboardProps) {
         </article>
 
         {profile.role === 'teacher' && <TeacherReviewQueue teacherId={profile.id} />}
+        {profile.role === 'admin' && (
+          <div className="admin-panel">
+            <div className="admin-mode-switch" aria-label="Admin role preview">
+              {(['overview', 'student', 'resident', 'teacher'] as const).map((mode) => (
+                <button
+                  key={mode}
+                  className={adminView === mode ? 'admin-mode-button is-active' : 'admin-mode-button'}
+                  onClick={() => setAdminView(mode)}
+                  type="button"
+                >
+                  {mode === 'overview' ? 'Overview' : mode}
+                </button>
+              ))}
+            </div>
+
+            {adminView === 'overview' && (
+              <div className="admin-summary-grid">
+                <div className="admin-summary-card">
+                  <span>Pending project approvals</span>
+                  <strong>Teacher queue</strong>
+                </div>
+                <div className="admin-summary-card">
+                  <span>Field hours awaiting sign-off</span>
+                  <strong>Student fulfillment</strong>
+                </div>
+                <div className="admin-summary-card">
+                  <span>Resident tasks</span>
+                  <strong>Safety-first posting review</strong>
+                </div>
+                <div className="admin-summary-card">
+                  <span>District oversight</span>
+                  <strong>Role switch available</strong>
+                </div>
+              </div>
+            )}
+
+            {adminView !== 'overview' && (
+              <div className="admin-preview-card">
+                <p className="admin-preview-label">{adminView.charAt(0).toUpperCase() + adminView.slice(1)} mode</p>
+                <h3>
+                  {adminView === 'student'
+                    ? 'Student view: project access and logged hours'
+                    : adminView === 'resident'
+                      ? 'Resident view: project posting and status tracking'
+                      : 'Teacher view: approvals and sign-off queue'}
+                </h3>
+                <p>
+                  {adminView === 'student'
+                    ? 'This perspective lets the admin preview how a student sees approved projects, claims, and field-hour submissions.'
+                    : adminView === 'resident'
+                      ? 'This perspective lets the admin preview how a resident sees new project creation, status updates, and pending review states.'
+                      : 'This perspective lets the admin preview the teacher approval queue for project safety and student field-hour verification.'}
+                </p>
+              </div>
+            )}
+
+            <TeacherReviewQueue teacherId={profile.id} />
+          </div>
+        )}
         {signOutError && <p className="dashboard-error" role="alert">{signOutError}</p>}
       </section>
     </main>
