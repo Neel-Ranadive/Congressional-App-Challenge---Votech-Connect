@@ -1,8 +1,30 @@
-import { useCallback, useEffect, useState } from 'react'
+import { lazy, Suspense, useCallback, useEffect, useState } from 'react'
 import { Check, Clock3, LogOut, MapPin, RefreshCw, ShieldCheck } from 'lucide-react'
 import type { FieldHour, Profile, Project, ProjectStatus } from '../types/models'
 import { supabase } from '../lib/supabaseClient'
 import './Dashboard.css'
+
+const AdminOverview = lazy(() =>
+  import('./RoleWorkspaces').then((module) => ({ default: module.AdminOverview })),
+)
+const IndustryPartnerWorkspace = lazy(() =>
+  import('./RoleWorkspaces').then((module) => ({ default: module.IndustryPartnerWorkspace })),
+)
+const PartnerReviewQueue = lazy(() =>
+  import('./RoleWorkspaces').then((module) => ({ default: module.PartnerReviewQueue })),
+)
+const PlacementWorkspace = lazy(() =>
+  import('./RoleWorkspaces').then((module) => ({ default: module.PlacementWorkspace })),
+)
+const ResidentWorkspace = lazy(() =>
+  import('./RoleWorkspaces').then((module) => ({ default: module.ResidentWorkspace })),
+)
+const StudentWorkspace = lazy(() =>
+  import('./RoleWorkspaces').then((module) => ({ default: module.StudentWorkspace })),
+)
+const GoogleClassroomWorkspace = lazy(() =>
+  import('./GoogleClassroomWorkspace').then((module) => ({ default: module.GoogleClassroomWorkspace })),
+)
 
 interface DashboardProps {
   profile: Profile
@@ -13,12 +35,17 @@ const dashboardDetails = {
   student: {
     label: 'Student dashboard',
     description: 'Explore approved community projects and keep track of your learning hours.',
-    next: 'Approved projects and field-hour logging are the next dashboard features.',
+    next: '',
   },
   resident: {
     label: 'Resident dashboard',
     description: 'Share a community project and follow its progress through teacher review.',
-    next: 'Project posting and status tracking are the next dashboard features.',
+    next: '',
+  },
+  industry_partner: {
+    label: 'Industry partner dashboard',
+    description: 'Propose supervised trade-learning opportunities for school review.',
+    next: '',
   },
   teacher: {
     label: 'Teacher dashboard',
@@ -123,6 +150,7 @@ function formatDate(value: string) {
 
 interface ReviewQueueData {
   projects: Project[]
+  assignmentRequests: Project[]
   fieldHours: FieldHour[]
   studentNames: Map<string, string>
   projectTitles: Map<string, string>
@@ -130,25 +158,98 @@ interface ReviewQueueData {
 
 interface TeacherReviewQueueProps {
   teacherId: string
+  readOnly?: boolean
 }
 
-function TeacherReviewQueue({ teacherId }: TeacherReviewQueueProps) {
+const projectApprovalChecks = [
+  'I reviewed the task scope and confirmed it is on the approved low-risk task list.',
+  'The location shown is a general area only; private address details are handled through school-approved procedures.',
+  'The assignment has an appropriate adult-supervision and safety plan under school policy.',
+]
+
+const assignmentApprovalChecks = [
+  'I verified that the student is eligible and the task fits their training and current school requirements.',
+  'I confirmed the resident and exact work location through an approved school process.',
+  'I reviewed the supervision, transportation, emergency-contact, and safety arrangements required by school policy.',
+]
+
+const fieldHourApprovalChecks = [
+  'I checked the submitted time against the project and the student’s account of work performed.',
+  'The hours correspond to work on a teacher-approved assignment and will be recorded accurately.',
+]
+
+interface ApprovalGateProps {
+  checks: string[]
+  busy: boolean
+  readOnly?: boolean
+  busyLabel: string
+  buttonLabel: string
+  onApprove: () => void
+}
+
+function ApprovalGate({ checks, busy, readOnly = false, busyLabel, buttonLabel, onApprove }: ApprovalGateProps) {
+  const [confirmedChecks, setConfirmedChecks] = useState<boolean[]>(() => checks.map(() => false))
+  const allConfirmed = confirmedChecks.every(Boolean)
+
+  return (
+    <div className="approval-gate">
+      <fieldset disabled={busy || readOnly} className="approval-checklist">
+        <legend>Complete this review before approval</legend>
+        {checks.map((check, index) => (
+          <label key={check}>
+            <input
+              checked={confirmedChecks[index]}
+              onChange={(event) => {
+                setConfirmedChecks((current) =>
+                  current.map((confirmed, checkIndex) =>
+                    checkIndex === index ? event.target.checked : confirmed,
+                  ),
+                )
+              }}
+              type="checkbox"
+            />
+            <span>{check}</span>
+          </label>
+        ))}
+      </fieldset>
+      <button
+        className="review-approve"
+        disabled={busy || readOnly || !allConfirmed}
+        onClick={onApprove}
+        type="button"
+      >
+        <Check aria-hidden="true" size={16} />
+        {busy ? busyLabel : buttonLabel}
+      </button>
+    </div>
+  )
+}
+
+function TeacherReviewQueue({ teacherId, readOnly = false }: TeacherReviewQueueProps) {
   const [projects, setProjects] = useState<Project[]>([])
+  const [assignmentRequests, setAssignmentRequests] = useState<Project[]>([])
   const [fieldHours, setFieldHours] = useState<FieldHour[]>([])
   const [studentNames, setStudentNames] = useState<Map<string, string>>(new Map())
   const [projectTitles, setProjectTitles] = useState<Map<string, string>>(new Map())
   const [isLoading, setIsLoading] = useState(true)
   const [projectActionId, setProjectActionId] = useState<string | null>(null)
+  const [assignmentActionId, setAssignmentActionId] = useState<string | null>(null)
   const [hourActionId, setHourActionId] = useState<string | null>(null)
   const [errorMessage, setErrorMessage] = useState('')
   const [statusMessage, setStatusMessage] = useState('')
 
   const fetchQueue = useCallback(async (): Promise<ReviewQueueData> => {
-    const [projectResult, hourResult] = await Promise.all([
+    const [projectResult, assignmentResult, hourResult] = await Promise.all([
       supabase
         .from('projects')
         .select('id, resident_id, assigned_student_id, title, description, trade_category, location, status, created_at')
         .eq('status', 'pending')
+        .order('created_at', { ascending: false }),
+      supabase
+        .from('projects')
+        .select('id, resident_id, assigned_student_id, title, description, trade_category, location, status, created_at')
+        .eq('status', 'approved')
+        .not('assigned_student_id', 'is', null)
         .order('created_at', { ascending: false }),
       supabase
         .from('field_hours')
@@ -158,11 +259,16 @@ function TeacherReviewQueue({ teacherId }: TeacherReviewQueueProps) {
     ])
 
     if (projectResult.error) throw projectResult.error
+    if (assignmentResult.error) throw assignmentResult.error
     if (hourResult.error) throw hourResult.error
 
     const pendingProjects = parseProjects(projectResult.data)
+    const pendingAssignments = parseProjects(assignmentResult.data)
     const pendingHours = parseFieldHours(hourResult.data)
-    const studentIds = [...new Set(pendingHours.map((entry) => entry.student_id))]
+    const studentIds = [...new Set([
+      ...pendingHours.map((entry) => entry.student_id),
+      ...pendingAssignments.flatMap((project) => project.assigned_student_id ? [project.assigned_student_id] : []),
+    ])]
     const relatedProjectIds = [...new Set(pendingHours.map((entry) => entry.project_id))]
     const [studentResult, relatedProjectResult] = await Promise.all([
       studentIds.length
@@ -196,6 +302,7 @@ function TeacherReviewQueue({ teacherId }: TeacherReviewQueueProps) {
 
     return {
       projects: pendingProjects,
+      assignmentRequests: pendingAssignments,
       fieldHours: pendingHours,
       studentNames: names,
       projectTitles: titles,
@@ -204,6 +311,7 @@ function TeacherReviewQueue({ teacherId }: TeacherReviewQueueProps) {
 
   function applyQueueData(data: ReviewQueueData) {
     setProjects(data.projects)
+    setAssignmentRequests(data.assignmentRequests)
     setFieldHours(data.fieldHours)
     setStudentNames(data.studentNames)
     setProjectTitles(data.projectTitles)
@@ -275,6 +383,37 @@ function TeacherReviewQueue({ teacherId }: TeacherReviewQueueProps) {
     }
   }
 
+  async function approveAssignment(project: Project) {
+    setAssignmentActionId(project.id)
+    setErrorMessage('')
+    setStatusMessage('')
+
+    try {
+      const { data, error } = await supabase
+        .from('projects')
+        .update({ status: 'in_progress' })
+        .eq('id', project.id)
+        .eq('status', 'approved')
+        .eq('assigned_student_id', project.assigned_student_id)
+        .select('id')
+        .maybeSingle()
+
+      if (error) throw error
+      if (!data) {
+        throw new Error('This assignment request is no longer pending or you are not allowed to approve it. Refresh and try again.')
+      }
+
+      setAssignmentRequests((current) => current.filter((item) => item.id !== project.id))
+      setStatusMessage('Student assignment approved. The student can now begin the supervised project.')
+    } catch (error) {
+      setErrorMessage(
+        error instanceof Error ? error.message : 'Could not approve this student assignment.',
+      )
+    } finally {
+      setAssignmentActionId(null)
+    }
+  }
+
   async function approveHours(entry: FieldHour) {
     setHourActionId(entry.id)
     setErrorMessage('')
@@ -308,7 +447,7 @@ function TeacherReviewQueue({ teacherId }: TeacherReviewQueueProps) {
   return (
     <div className="teacher-review">
       <div className="review-toolbar">
-        <p><ShieldCheck aria-hidden="true" size={17} /> Teacher review queue</p>
+        <p><ShieldCheck aria-hidden="true" size={17} /> {readOnly ? 'Teacher workspace preview' : 'Teacher review queue'}</p>
         <button
           className="review-refresh"
           disabled={isLoading}
@@ -320,6 +459,7 @@ function TeacherReviewQueue({ teacherId }: TeacherReviewQueueProps) {
         </button>
       </div>
 
+      {readOnly && <p className="review-message review-success">Read-only admin preview. Approval actions are disabled and no records can be changed from this view.</p>}
       {errorMessage && <p className="review-message review-error" role="alert">{errorMessage}</p>}
       {statusMessage && <p className="review-message review-success" role="status">{statusMessage}</p>}
 
@@ -351,15 +491,57 @@ function TeacherReviewQueue({ teacherId }: TeacherReviewQueueProps) {
                     <p className="review-detail">
                       <MapPin aria-hidden="true" size={15} /> {project.location}
                     </p>
-                    <button
-                      className="review-approve"
-                      disabled={projectActionId !== null || hourActionId !== null}
-                      onClick={() => void approveProject(project)}
-                      type="button"
-                    >
-                      <Check aria-hidden="true" size={16} />
-                      {projectActionId === project.id ? 'Approving...' : 'Approve project'}
-                    </button>
+                    <ApprovalGate
+                      checks={projectApprovalChecks}
+                      busy={projectActionId !== null || assignmentActionId !== null || hourActionId !== null}
+                      readOnly={readOnly}
+                      busyLabel="Approving..."
+                      buttonLabel="Approve project"
+                      onApprove={() => void approveProject(project)}
+                    />
+                  </article>
+                ))}
+              </div>
+            )}
+          </section>
+
+          <section className="review-section" aria-labelledby="assignment-review-title">
+            <div className="review-section-heading">
+              <div>
+                <p className="review-section-label">Minor-safety gate</p>
+                <h2 id="assignment-review-title">Student assignment requests</h2>
+              </div>
+              <span className="review-count">{assignmentRequests.length}</span>
+            </div>
+
+            {assignmentRequests.length === 0 ? (
+              <p className="review-empty">No student claims are waiting for approval.</p>
+            ) : (
+              <div className="review-list">
+                {assignmentRequests.map((project) => (
+                  <article className="review-card" key={project.id}>
+                    <div className="review-card-topline">
+                      <span className="review-category">{project.trade_category}</span>
+                      <span className="review-date">Posted {formatDate(project.created_at)}</span>
+                    </div>
+                    <h3>{project.title}</h3>
+                    <p className="review-card-description">{project.description}</p>
+                    <p className="review-detail">
+                      Student: {project.assigned_student_id
+                        ? studentNames.get(project.assigned_student_id) ?? 'Profile unavailable'
+                        : 'No student assigned'}
+                    </p>
+                    <p className="review-detail">
+                      <MapPin aria-hidden="true" size={15} /> {project.location}
+                    </p>
+                    <ApprovalGate
+                      checks={assignmentApprovalChecks}
+                      busy={projectActionId !== null || assignmentActionId !== null || hourActionId !== null}
+                      readOnly={readOnly}
+                      busyLabel="Approving..."
+                      buttonLabel="Approve assignment"
+                      onApprove={() => void approveAssignment(project)}
+                    />
                   </article>
                 ))}
               </div>
@@ -392,15 +574,14 @@ function TeacherReviewQueue({ teacherId }: TeacherReviewQueueProps) {
                     <p className="review-card-description">
                       {projectTitles.get(entry.project_id) ?? 'Project details unavailable'}
                     </p>
-                    <button
-                      className="review-approve"
-                      disabled={projectActionId !== null || hourActionId !== null}
-                      onClick={() => void approveHours(entry)}
-                      type="button"
-                    >
-                      <Check aria-hidden="true" size={16} />
-                      {hourActionId === entry.id ? 'Signing off...' : 'Approve field hours'}
-                    </button>
+                    <ApprovalGate
+                      checks={fieldHourApprovalChecks}
+                      busy={projectActionId !== null || assignmentActionId !== null || hourActionId !== null}
+                      readOnly={readOnly}
+                      busyLabel="Signing off..."
+                      buttonLabel="Approve field hours"
+                      onApprove={() => void approveHours(entry)}
+                    />
                   </article>
                 ))}
               </div>
@@ -415,7 +596,9 @@ function TeacherReviewQueue({ teacherId }: TeacherReviewQueueProps) {
 function Dashboard({ profile, onSignOut }: DashboardProps) {
   const [signOutError, setSignOutError] = useState('')
   const [isSigningOut, setIsSigningOut] = useState(false)
-  const [adminView, setAdminView] = useState<'overview' | 'student' | 'resident' | 'teacher'>('overview')
+  const [adminView, setAdminView] = useState<
+    'overview' | 'student' | 'resident' | 'teacher' | 'industry_partner'
+  >('overview')
   const details = dashboardDetails[profile.role]
 
   async function handleSignOut() {
@@ -461,14 +644,29 @@ function Dashboard({ profile, onSignOut }: DashboardProps) {
           {profile.role === 'student' && profile.trade_area && (
             <p className="dashboard-trade">Trade area: {profile.trade_area}</p>
           )}
-          {profile.role !== 'teacher' && <p>{details.next}</p>}
+          {details.next && <p>{details.next}</p>}
         </article>
 
-        {profile.role === 'teacher' && <TeacherReviewQueue teacherId={profile.id} />}
-        {profile.role === 'admin' && (
-          <div className="admin-panel">
+        <Suspense fallback={<p className="workspace-loading" role="status">Loading your workspace...</p>}>
+          {profile.role === 'student' && (
+            <>
+              <StudentWorkspace profile={profile} />
+              <PlacementWorkspace profile={profile} />
+            </>
+          )}
+          {profile.role === 'resident' && <ResidentWorkspace profile={profile} />}
+          {profile.role === 'industry_partner' && <IndustryPartnerWorkspace profile={profile} />}
+          {profile.role === 'teacher' && (
+            <>
+              <GoogleClassroomWorkspace />
+              <TeacherReviewQueue teacherId={profile.id} />
+              <PartnerReviewQueue teacherId={profile.id} />
+            </>
+          )}
+          {profile.role === 'admin' && (
+            <div className="admin-panel">
             <div className="admin-mode-switch" aria-label="Admin role preview">
-              {(['overview', 'student', 'resident', 'teacher'] as const).map((mode) => (
+              {(['overview', 'student', 'resident', 'teacher', 'industry_partner'] as const).map((mode) => (
                 <button
                   key={mode}
                   className={adminView === mode ? 'admin-mode-button is-active' : 'admin-mode-button'}
@@ -481,49 +679,30 @@ function Dashboard({ profile, onSignOut }: DashboardProps) {
             </div>
 
             {adminView === 'overview' && (
-              <div className="admin-summary-grid">
-                <div className="admin-summary-card">
-                  <span>Pending project approvals</span>
-                  <strong>Teacher queue</strong>
-                </div>
-                <div className="admin-summary-card">
-                  <span>Field hours awaiting sign-off</span>
-                  <strong>Student fulfillment</strong>
-                </div>
-                <div className="admin-summary-card">
-                  <span>Resident tasks</span>
-                  <strong>Safety-first posting review</strong>
-                </div>
-                <div className="admin-summary-card">
-                  <span>District oversight</span>
-                  <strong>Role switch available</strong>
-                </div>
-              </div>
+              <AdminOverview onOpenMode={(mode) => setAdminView(mode)} />
             )}
-
-            {adminView !== 'overview' && (
-              <div className="admin-preview-card">
-                <p className="admin-preview-label">{adminView.charAt(0).toUpperCase() + adminView.slice(1)} mode</p>
-                <h3>
-                  {adminView === 'student'
-                    ? 'Student view: project access and logged hours'
-                    : adminView === 'resident'
-                      ? 'Resident view: project posting and status tracking'
-                      : 'Teacher view: approvals and sign-off queue'}
-                </h3>
-                <p>
-                  {adminView === 'student'
-                    ? 'This perspective lets the admin preview how a student sees approved projects, claims, and field-hour submissions.'
-                    : adminView === 'resident'
-                      ? 'This perspective lets the admin preview how a resident sees new project creation, status updates, and pending review states.'
-                      : 'This perspective lets the admin preview the teacher approval queue for project safety and student field-hour verification.'}
-                </p>
-              </div>
+            {adminView === 'student' && (
+              <>
+                <StudentWorkspace profile={{ ...profile, role: 'student' }} preview />
+                <PlacementWorkspace profile={{ ...profile, role: 'student' }} preview />
+              </>
             )}
-
-            <TeacherReviewQueue teacherId={profile.id} />
-          </div>
-        )}
+            {adminView === 'resident' && (
+              <ResidentWorkspace profile={{ ...profile, role: 'resident' }} preview />
+            )}
+            {adminView === 'teacher' && (
+              <>
+                <GoogleClassroomWorkspace />
+                <TeacherReviewQueue teacherId={profile.id} readOnly />
+                <PartnerReviewQueue teacherId={profile.id} readOnly />
+              </>
+            )}
+            {adminView === 'industry_partner' && (
+              <IndustryPartnerWorkspace profile={{ ...profile, role: 'industry_partner' }} preview />
+            )}
+            </div>
+          )}
+        </Suspense>
         {signOutError && <p className="dashboard-error" role="alert">{signOutError}</p>}
       </section>
     </main>

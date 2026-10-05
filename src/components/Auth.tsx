@@ -3,11 +3,9 @@ import { supabase } from '../lib/supabaseClient'
 import { isUserRole, type UserRole } from '../types/models'
 import './Auth.css'
 
-type AuthMode = 'sign-in' | 'sign-up'
+type AuthMode = 'sign-in' | 'sign-up' | 'reset-password'
 
 const STUDENT_EMAIL_DOMAIN = '@mcvts.org'
-const TEACHER_INVITE_CODE = (import.meta.env.VITE_TEACHER_INVITE_CODE ?? '').trim()
-const ADMIN_INVITE_CODE = (import.meta.env.VITE_ADMIN_INVITE_CODE ?? '').trim()
 
 function Auth() {
   const [mode, setMode] = useState<AuthMode>('sign-in')
@@ -16,7 +14,6 @@ function Auth() {
   const [fullName, setFullName] = useState('')
   const [role, setRole] = useState<UserRole>('student')
   const [tradeArea, setTradeArea] = useState('')
-  const [teacherInviteCode, setTeacherInviteCode] = useState('')
   const [errorMessage, setErrorMessage] = useState('')
   const [statusMessage, setStatusMessage] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -26,6 +23,26 @@ function Auth() {
     event.preventDefault()
     setErrorMessage('')
     setStatusMessage('')
+
+    if (mode === 'reset-password') {
+      setIsSubmitting(true)
+      try {
+        const { error } = await supabase.auth.resetPasswordForEmail(email.trim(), {
+          redirectTo: window.location.origin,
+        })
+        if (error) throw error
+        setStatusMessage('If an account uses that email, Supabase will send a password reset link. Check your inbox and spam folder.')
+      } catch (error) {
+        setErrorMessage(
+          error instanceof Error
+            ? error.message
+            : 'Could not request a password reset. Please try again.',
+        )
+      } finally {
+        setIsSubmitting(false)
+      }
+      return
+    }
 
     if (isSignUp && (!fullName.trim() || (role === 'student' && !tradeArea.trim()))) {
       setErrorMessage('Enter your name and, for student accounts, your trade area.')
@@ -39,30 +56,6 @@ function Auth() {
     ) {
       setErrorMessage(`Student accounts must use an ${STUDENT_EMAIL_DOMAIN} email address.`)
       return
-    }
-
-    if (isSignUp && role === 'teacher') {
-      if (!TEACHER_INVITE_CODE) {
-        setErrorMessage('Teacher registrations are invite-only. Ask your district administrator to configure a teacher invite code.')
-        return
-      }
-
-      if (teacherInviteCode.trim() !== TEACHER_INVITE_CODE) {
-        setErrorMessage('The teacher invite code is invalid or expired.')
-        return
-      }
-    }
-
-    if (isSignUp && role === 'admin') {
-      if (!ADMIN_INVITE_CODE) {
-        setErrorMessage('Admin registrations are invite-only. Add VITE_ADMIN_INVITE_CODE to your environment before creating an admin account.')
-        return
-      }
-
-      if (teacherInviteCode.trim() !== ADMIN_INVITE_CODE) {
-        setErrorMessage('The admin invite code is invalid or expired.')
-        return
-      }
     }
 
     setIsSubmitting(true)
@@ -109,7 +102,6 @@ function Auth() {
 
   function changeMode(nextMode: AuthMode) {
     setMode(nextMode)
-    setTeacherInviteCode('')
     setErrorMessage('')
     setStatusMessage('')
   }
@@ -136,15 +128,25 @@ function Auth() {
 
       <section className="auth-panel" aria-labelledby="auth-title">
         <div className="auth-card">
-          <p className="eyebrow auth-eyebrow">{isSignUp ? 'Get started' : 'Welcome back'}</p>
-          <h2 id="auth-title">{isSignUp ? 'Create your account' : 'Sign in to your account'}</h2>
+          <p className="eyebrow auth-eyebrow">
+            {isSignUp ? 'Get started' : mode === 'reset-password' ? 'Account recovery' : 'Welcome back'}
+          </p>
+          <h2 id="auth-title">
+            {isSignUp
+              ? 'Create your account'
+              : mode === 'reset-password'
+                ? 'Reset your password'
+                : 'Sign in to your account'}
+          </h2>
           <p className="auth-subtitle">
             {isSignUp
-              ? 'Join students, residents, and teachers making a difference.'
-              : 'Pick up where you left off in your community.'}
+              ? 'Students and residents can register here. Teacher and admin accounts are issued by an authorized administrator.'
+              : mode === 'reset-password'
+                ? 'Enter your account email and we’ll request a reset link from Supabase.'
+                : 'Pick up where you left off in your community.'}
           </p>
 
-          <div className="auth-tabs" role="group" aria-label="Account access">
+          {mode !== 'reset-password' && <div className="auth-tabs" role="group" aria-label="Account access">
             <button
               className={!isSignUp ? 'auth-tab is-active' : 'auth-tab'}
               type="button"
@@ -161,7 +163,7 @@ function Auth() {
             >
               Create account
             </button>
-          </div>
+          </div>}
 
           <form className="auth-form" onSubmit={handleSubmit}>
             {isSignUp && (
@@ -185,15 +187,12 @@ function Auth() {
                     onChange={(event) => {
                       if (isUserRole(event.target.value)) {
                         setRole(event.target.value)
-                        setTeacherInviteCode('')
                       }
                     }}
                     value={role}
                   >
                     <option value="student">Student</option>
                     <option value="resident">Resident</option>
-                    <option value="teacher">Teacher</option>
-                    <option value="admin">Admin</option>
                   </select>
                 </label>
 
@@ -211,33 +210,6 @@ function Auth() {
                   </label>
                 )}
 
-                {(role === 'teacher' || role === 'admin') && (
-                  <label className="form-field">
-                    <span>{role === 'admin' ? 'Admin invite code' : 'Teacher invite code'}</span>
-                    <input
-                      autoComplete="off"
-                      name="teacher_invite"
-                      onChange={(event) => setTeacherInviteCode(event.target.value)}
-                      placeholder={
-                        role === 'admin'
-                          ? ADMIN_INVITE_CODE
-                            ? 'Enter the admin invite code'
-                            : 'Admin invite code not configured'
-                          : TEACHER_INVITE_CODE
-                            ? 'Enter your district invite code'
-                            : 'Invite code not configured'
-                      }
-                      required
-                      type="password"
-                      value={teacherInviteCode}
-                    />
-                    <span className="field-hint">
-                      {role === 'admin'
-                        ? 'Admin access is restricted to designated district operators.'
-                        : 'Teacher access is invite-only to keep district oversight and student safety in place.'}
-                    </span>
-                  </label>
-                )}
               </>
             )}
 
@@ -262,19 +234,21 @@ function Auth() {
               )}
             </label>
 
-            <label className="form-field">
-              <span>Password</span>
-              <input
-                autoComplete={isSignUp ? 'new-password' : 'current-password'}
-                minLength={isSignUp ? 6 : undefined}
-                name="password"
-                onChange={(event) => setPassword(event.target.value)}
-                placeholder={isSignUp ? 'At least 6 characters' : 'Your password'}
-                required
-                type="password"
-                value={password}
-              />
-            </label>
+            {mode !== 'reset-password' && (
+              <label className="form-field">
+                <span>Password</span>
+                <input
+                  autoComplete={isSignUp ? 'new-password' : 'current-password'}
+                  minLength={isSignUp ? 6 : undefined}
+                  name="password"
+                  onChange={(event) => setPassword(event.target.value)}
+                  placeholder={isSignUp ? 'At least 6 characters' : 'Your password'}
+                  required
+                  type="password"
+                  value={password}
+                />
+              </label>
+            )}
 
             {errorMessage && (
               <p className="form-message form-error" role="alert">{errorMessage}</p>
@@ -286,7 +260,9 @@ function Auth() {
             <button className="submit-button" disabled={isSubmitting} type="submit">
               {isSubmitting
                 ? 'Please wait...'
-                : isSignUp
+                : mode === 'reset-password'
+                  ? 'Send reset link'
+                  : isSignUp
                   ? 'Create account'
                   : 'Sign in'}
               {!isSubmitting && <span aria-hidden="true">→</span>}
@@ -294,15 +270,26 @@ function Auth() {
           </form>
 
           <p className="auth-switch">
-            {isSignUp ? 'Already have an account?' : 'New to VoTech Connect?'}{' '}
+            {mode === 'reset-password'
+              ? 'Remembered your password?'
+              : isSignUp
+                ? 'Already have an account?'
+                : 'New to VoTech Connect?'}{' '}
             <button
               className="text-button"
-              onClick={() => changeMode(isSignUp ? 'sign-in' : 'sign-up')}
+              onClick={() => changeMode(mode === 'reset-password' ? 'sign-in' : isSignUp ? 'sign-in' : 'sign-up')}
               type="button"
             >
-              {isSignUp ? 'Sign in' : 'Create an account'}
+              {mode === 'reset-password' ? 'Sign in' : isSignUp ? 'Sign in' : 'Create an account'}
             </button>
           </p>
+          {mode === 'sign-in' && (
+            <p className="auth-switch auth-recovery-switch">
+              <button className="text-button" onClick={() => changeMode('reset-password')} type="button">
+                Forgot password?
+              </button>
+            </p>
+          )}
         </div>
       </section>
     </main>

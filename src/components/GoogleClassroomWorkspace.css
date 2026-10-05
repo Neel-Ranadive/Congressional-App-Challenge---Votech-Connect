@@ -1,0 +1,277 @@
+.classroom-workspace {
+  margin-top: 28px;
+  padding: 20px;
+  border: 1px solid #e2e8e3;
+  border-radius: 13px;
+  background: #fff;
+}
+
+.classroom-heading {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.classroom-heading-icon {
+  display: grid;
+  width: 40px;
+  height: 40px;
+  flex: 0 0 auto;
+  place-items: center;
+  border-radius: 11px;
+  background: #edf4e9;
+  color: #24583f;
+}
+
+.classroom-heading-copy {
+  min-width: 0;
+  flex: 1;
+}
+
+.classroom-heading-copy .workspace-eyebrow {
+  margin-bottom: 2px;
+}
+
+.classroom-heading-copy h2 {
+  margin: 0;
+  color: #20372b;
+  font-size: 19px;
+  letter-spacing: -0.035em;
+}
+
+.classroom-heading-copy > p:last-child {
+  margin: 4px 0 0;
+  color: #718078;
+  font-size: 11px;
+  line-height: 1.5;
+}
+
+.classroom-connect-button {
+  min-height: 38px;
+  flex: 0 0 auto;
+  padding: 0 12px;
+  border: 0;
+  border-radius: 8px;
+  background: #24583f;
+  color: #fff;
+  cursor: pointer;
+  font: inherit;
+  font-size: 11px;
+  font-weight: 750;
+}
+
+.classroom-connect-button:hover:not(:disabled) {
+  background: #1b4832;
+}
+
+.classroom-connect-button:disabled {
+  cursor: wait;
+  opacity: 0.65;
+}
+
+.classroom-connect-button.is-connected {
+  border: 1px solid #dce4dd;
+  background: #fff;
+  color: #35443c;
+}
+
+.classroom-actions {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 8px;
+}
+
+.classroom-disconnect-button {
+  padding: 6px 2px;
+  border: 0;
+  background: transparent;
+  color: #718078;
+  cursor: pointer;
+  font: inherit;
+  font-size: 10px;
+  font-weight: 650;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.classroom-privacy {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin-top: 15px;
+  padding: 11px;
+  border-radius: 8px;
+  background: #f1f6ef;
+  color: #45634b;
+}
+
+.classroom-privacy svg {
+  flex: 0 0 auto;
+  margin-top: 1px;
+}
+
+.classroom-privacy p {
+  margin: 0;
+  font-size: 10px;
+  line-height: 1.55;
+}
+
+.classroom-setup,
+.classroom-feedback {
+  margin: 12px 0 0;
+  padding: 10px 11px;
+  border-radius: 7px;
+  font-size: 11px;
+  line-height: 1.55;
+}
+
+.classroom-setup {
+  background: #fff6e5;
+  color: #755618;
+}
+
+.classroom-setup code {
+  font-size: 10px;
+}
+
+.classroom-feedback.is-error {
+  background: #fff0ed;
+  color: #a73c2d;
+}
+
+.classroom-feedback.is-success {
+  background: #edf6ee;
+  color: #2e6945;
+}
+
+.classroom-roster-area {
+  margin-top: 16px;
+}
+
+.classroom-select-row {
+  display: flex;
+  align-items: end;
+  gap: 10px;
+}
+
+.classroom-select-row .workspace-field {
+  min-width: 0;
+  flex: 1;
+}
+
+.classroom-load-button {
+  min-height: 42px;
+}
+
+.classroom-roster-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+  margin-top: 16px;
+}
+
+.classroom-roster-list {
+  min-width: 0;
+  padding: 13px;
+  border: 1px solid #e6ebe6;
+  border-radius: 9px;
+  background: #fbfcfb;
+}
+
+.classroom-roster-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.classroom-roster-heading h3 {
+  margin: 0;
+  color: #20372b;
+  font-size: 13px;
+}
+
+.classroom-roster-heading > span {
+  display: grid;
+  min-width: 22px;
+  height: 22px;
+  place-items: center;
+  padding: 0 5px;
+  border-radius: 999px;
+  background: #eaf1e7;
+  color: #24583f;
+  font-size: 10px;
+  font-weight: 800;
+}
+
+.classroom-roster-list > p {
+  margin: 0;
+  color: #718078;
+  font-size: 10px;
+}
+
+.classroom-person {
+  display: grid;
+  gap: 2px;
+  padding: 9px 0;
+  border-top: 1px solid #e9eee9;
+}
+
+.classroom-person strong {
+  color: #35443c;
+  font-size: 11px;
+}
+
+.classroom-person span {
+  overflow-wrap: anywhere;
+  color: #718078;
+  font-size: 10px;
+}
+
+.classroom-google-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  margin-top: 14px;
+  color: #386248;
+  font-size: 10px;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.classroom-google-link:hover {
+  text-decoration: underline;
+}
+
+@media (max-width: 560px) {
+  .classroom-workspace {
+    padding: 14px;
+  }
+
+  .classroom-heading {
+    flex-wrap: wrap;
+  }
+
+  .classroom-heading-copy {
+    flex-basis: calc(100% - 58px);
+  }
+
+  .classroom-connect-button {
+    margin-left: 52px;
+  }
+
+  .classroom-actions {
+    margin-left: 52px;
+  }
+
+  .classroom-select-row {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .classroom-roster-grid {
+    grid-template-columns: 1fr;
+  }
+}

@@ -137,6 +137,12 @@
   font-size: 14px;
 }
 
+.workspace-loading {
+  margin: 32px 0;
+  color: #647269;
+  font-size: 13px;
+}
+
 .admin-panel {
   margin-top: 28px;
 }
@@ -299,7 +305,7 @@
 
 .review-columns {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 250px), 1fr));
   align-items: start;
   gap: 22px;
 }
@@ -442,6 +448,53 @@
 .review-approve:disabled {
   cursor: wait;
   opacity: 0.65;
+}
+
+.approval-gate {
+  margin-top: 14px;
+}
+
+.approval-checklist {
+  display: grid;
+  gap: 9px;
+  margin: 0;
+  padding: 12px;
+  border: 1px solid #e5ebe5;
+  border-radius: 8px;
+  background: #f8faf8;
+}
+
+.approval-checklist legend {
+  padding: 0 5px;
+  color: #56675c;
+  font-size: 10px;
+  font-weight: 750;
+}
+
+.approval-checklist label {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  color: #53635a;
+  cursor: pointer;
+  font-size: 10px;
+  line-height: 1.5;
+}
+
+.approval-checklist input {
+  flex: 0 0 auto;
+  width: 14px;
+  height: 14px;
+  margin: 1px 0 0;
+  accent-color: #24583f;
+}
+
+.approval-checklist:disabled label {
+  cursor: wait;
+}
+
+.approval-gate .review-approve {
+  width: 100%;
 }
 
 @media (max-width: 480px) {

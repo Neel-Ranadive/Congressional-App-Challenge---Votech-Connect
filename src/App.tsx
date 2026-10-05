@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import type { Session } from '@supabase/supabase-js'
 import Auth from './components/Auth'
 import Dashboard from './components/Dashboard'
+import PasswordUpdate from './components/PasswordUpdate'
 import { supabase } from './lib/supabaseClient'
 import { isUserRole, type Profile } from './types/models'
 import './App.css'
@@ -33,6 +34,7 @@ function App() {
   const [authState, setAuthState] = useState<AuthState>({ status: 'loading' })
   const [profileState, setProfileState] = useState<ProfileState>({ status: 'loading' })
   const [signOutError, setSignOutError] = useState('')
+  const [isPasswordRecovery, setIsPasswordRecovery] = useState(false)
 
   useEffect(() => {
     let isActive = true
@@ -40,6 +42,8 @@ function App() {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       receivedAuthEvent = true
       if (!isActive) return
+      if (_event === 'PASSWORD_RECOVERY') setIsPasswordRecovery(true)
+      if (_event === 'SIGNED_OUT') setIsPasswordRecovery(false)
 
       setAuthState(
         session ? { status: 'signed-in', session } : { status: 'signed-out' },
@@ -157,6 +161,10 @@ function App() {
   }
 
   if (authState.status === 'signed-out') return <Auth />
+
+  if (isPasswordRecovery) {
+    return <PasswordUpdate onUpdated={() => setIsPasswordRecovery(false)} />
+  }
 
   if (profileState.status === 'loading' || profileState.userId !== userId) {
     return <main className="app-state" role="status">Loading your account...</main>
