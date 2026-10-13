@@ -41,6 +41,18 @@ Keep Row Level Security enabled. Policies should enforce, in the database, that:
 
 The app displays Supabase errors when a policy blocks an action. Do not disable RLS to make the UI work. Verify the trigger and policies in a non-production project before using real student information.
 
+## Google sign-in
+
+The sign-in screen offers Google authentication through Supabase Auth. This is separate from the Google Classroom roster connection below. Google sign-in is for accounts that already have a VoTech Connect profile; public Google account creation is not enabled because new users must provide an approved app role and, for students, a trade area.
+
+1. In Google Cloud Console, configure the OAuth consent screen for the intended audience and create an OAuth client ID of type **Web application**.
+2. In the client, add the exact callback URL shown in Supabase under **Authentication → Providers → Google** to **Authorized redirect URIs**. It commonly looks like `https://<project-ref>.supabase.co/auth/v1/callback`; use the exact URL shown for your project.
+3. In Supabase, open **Authentication → Providers → Google**, enable Google, and enter the Google client ID and client secret. Keep the secret in Supabase; never add it to `.env.local`, frontend code, or a `VITE_` variable.
+4. In Supabase **Authentication → URL Configuration**, set the site URL and add the app URLs to the redirect allow list, including `http://localhost:5173/**` for local Vite development and the production URL when deployed.
+5. Start/restart the app and select **Continue with Google** on the sign-in screen. Use the Google account whose email is already associated with the user's VoTech Connect profile.
+
+Google OAuth consent settings, school Workspace restrictions, and the Supabase redirect allow list must all permit the account and app. Test the full redirect in a non-production project before use.
+
 ## Google Classroom (optional, read-only)
 
 The teacher workspace can list classes and load class teacher/student rosters using the Google Classroom REST API. Names and emails stay in browser memory for the current session; this app does not write roster data into Supabase.

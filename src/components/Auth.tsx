@@ -100,6 +100,30 @@ function Auth() {
     }
   }
 
+  async function handleGoogleSignIn() {
+    setErrorMessage('')
+    setStatusMessage('')
+    setIsSubmitting(true)
+
+    try {
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: window.location.origin,
+        },
+      })
+
+      if (error) throw error
+    } catch (error) {
+      setErrorMessage(
+        error instanceof Error
+          ? error.message
+          : 'Could not start Google sign-in. Please try again.',
+      )
+      setIsSubmitting(false)
+    }
+  }
+
   function changeMode(nextMode: AuthMode) {
     setMode(nextMode)
     setErrorMessage('')
@@ -164,6 +188,21 @@ function Auth() {
               Create account
             </button>
           </div>}
+
+          {mode === 'sign-in' && (
+            <>
+              <button
+                className="google-sign-in-button"
+                disabled={isSubmitting}
+                onClick={() => void handleGoogleSignIn()}
+                type="button"
+              >
+                <span className="google-mark" aria-hidden="true">G</span>
+                Continue with Google
+              </button>
+              <div className="auth-divider" aria-hidden="true"><span>or sign in with email</span></div>
+            </>
+          )}
 
           <form className="auth-form" onSubmit={handleSubmit}>
             {isSignUp && (
