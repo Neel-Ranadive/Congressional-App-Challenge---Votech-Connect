@@ -17,6 +17,8 @@ npm run build
 npm run lint
 ```
 
+If authentication shows a network error such as “Failed to fetch,” first verify that `.env.local` contains the real Supabase project URL and anon/publishable key from **Project Settings → API**. Example or placeholder values will not connect. After changing `.env.local`, stop and restart the Vite dev server. Never use the `service_role` key in the frontend or share `.env.local`.
+
 ## Supabase setup
 
 Create the `profiles`, `projects`, and `field_hours` tables described in the project schema. The current frontend expects:
@@ -28,7 +30,7 @@ Create the `profiles`, `projects`, and `field_hours` tables described in the pro
 
 The profile ID should reference the matching Supabase Auth user. Configure the `handle_new_user()` trigger to accept only public roles (`student` and `resident`) from signup metadata. Provision teachers and admins through a trusted administrator workflow; never trust a browser-provided role or invite code for elevated access.
 
-Apply the migrations in timestamp order. [`20261005140000_harden_public_signup_roles.sql`](./supabase/migrations/20261005140000_harden_public_signup_roles.sql) enforces public signup roles in the existing profile trigger and checks student school email and trade-area values on the server. [`20261005143000_industry_learning_placements.sql`](./supabase/migrations/20261005143000_industry_learning_placements.sql) adds separately provisioned industry-partner roles, supervised-learning placement tables, and RLS policies for listing review and student introductions. Review and apply these in a staging Supabase project first. The signup migration assumes the existing profile table has an `email` column and that its profile-creation trigger calls `public.handle_new_user()`.
+Apply the migrations in timestamp order. [`20261005140000_harden_public_signup_roles.sql`](./supabase/migrations/20261005140000_harden_public_signup_roles.sql) enforces public signup roles in the existing profile trigger and checks student school email and trade-area values on the server. [`20261005143000_industry_learning_placements.sql`](./supabase/migrations/20261005143000_industry_learning_placements.sql) adds separately provisioned industry-partner roles, supervised-learning placement tables, and RLS policies for listing review and student introductions. [`20261021140000_google_onboarding_and_admin_metrics.sql`](./supabase/migrations/20261021140000_google_onboarding_and_admin_metrics.sql) enables secure student/resident profile completion for Google OAuth accounts and adds an admin-role-checked aggregate metrics function. Review and apply these in a staging Supabase project first. The profile migrations assume the existing profile table has an `email` column and that its profile-creation trigger calls `public.handle_new_user()`.
 
 Keep Row Level Security enabled. Policies should enforce, in the database, that:
 
@@ -43,13 +45,13 @@ The app displays Supabase errors when a policy blocks an action. Do not disable 
 
 ## Google sign-in
 
-The sign-in screen offers Google authentication through Supabase Auth. This is separate from the Google Classroom roster connection below. Google sign-in is for accounts that already have a VoTech Connect profile; public Google account creation is not enabled because new users must provide an approved app role and, for students, a trade area.
+The sign-in screen offers Google authentication through Supabase Auth. This is separate from the Google Classroom roster connection below. New Google accounts can complete a student or resident profile after Google returns to the app; students must use an `@mcvts.org` address and provide a trade area. Teacher, industry partner, and admin roles cannot be self-selected.
 
 1. In Google Cloud Console, configure the OAuth consent screen for the intended audience and create an OAuth client ID of type **Web application**.
 2. In the client, add the exact callback URL shown in Supabase under **Authentication → Providers → Google** to **Authorized redirect URIs**. It commonly looks like `https://<project-ref>.supabase.co/auth/v1/callback`; use the exact URL shown for your project.
 3. In Supabase, open **Authentication → Providers → Google**, enable Google, and enter the Google client ID and client secret. Keep the secret in Supabase; never add it to `.env.local`, frontend code, or a `VITE_` variable.
 4. In Supabase **Authentication → URL Configuration**, set the site URL and add the app URLs to the redirect allow list, including `http://localhost:5173/**` for local Vite development and the production URL when deployed.
-5. Start/restart the app and select **Continue with Google** on the sign-in screen. Use the Google account whose email is already associated with the user's VoTech Connect profile.
+5. Apply the Supabase migrations in timestamp order, then start/restart the app and select **Continue with Google** on either the sign-in or create-account tab. New Google accounts will be asked to finish their profile.
 
 Google OAuth consent settings, school Workspace restrictions, and the Supabase redirect allow list must all permit the account and app. Test the full redirect in a non-production project before use.
 
@@ -67,7 +69,7 @@ The teacher workspace can list classes and load class teacher/student rosters us
    VITE_GOOGLE_CLASSROOM_CLIENT_ID=your-web-client-id.apps.googleusercontent.com
    ```
 
-The client ID is intended to be public in browser code. Never put a Google client secret or Supabase service-role key in a `VITE_` variable. A teacher must connect a Google account that is authorized to view the class rosters. School Google Workspace policies, Classroom API enablement, OAuth consent status, and user permissions can still deny access. The application must display those errors rather than treating a failed sync as an empty roster.
+The client ID is intended to be public in browser code. Replace the example value with the real OAuth **Web application** client ID from the same Google Cloud project, and ensure the app's exact origin is in **Authorized JavaScript origins**. Never put a Google client secret or Supabase service-role key in a `VITE_` variable. A teacher must connect a Google account that is authorized to view the class rosters. School Google Workspace policies, Classroom API enablement, OAuth consent status, and user permissions can still deny access. The application must display those errors rather than treating a failed sync as an empty roster.
 
 ## Current workflow boundaries
 

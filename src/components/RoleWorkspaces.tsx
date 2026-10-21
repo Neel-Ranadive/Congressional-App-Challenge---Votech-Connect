@@ -239,7 +239,7 @@ export function StudentWorkspace({ profile, preview = false }: StudentWorkspaceP
   const [myProjects, setMyProjects] = useState<ProjectSnapshot[]>([])
   const [myHours, setMyHours] = useState<HourSnapshot[]>([])
   const [projectTitles, setProjectTitles] = useState<Map<string, string>>(new Map())
-  const [isLoading, setIsLoading] = useState(true)
+  const [isLoading, setIsLoading] = useState(!preview)
   const [isRefreshing, setIsRefreshing] = useState(false)
   const [claimingId, setClaimingId] = useState<string | null>(null)
   const [loggingHours, setLoggingHours] = useState(false)
@@ -309,6 +309,9 @@ export function StudentWorkspace({ profile, preview = false }: StudentWorkspaceP
   }
 
   useEffect(() => {
+    if (preview) {
+      return
+    }
     let active = true
     void loadWorkspace()
       .then((data) => {
@@ -325,7 +328,7 @@ export function StudentWorkspace({ profile, preview = false }: StudentWorkspaceP
     return () => {
       active = false
     }
-  }, [loadWorkspace])
+  }, [loadWorkspace, preview])
 
   async function refresh() {
     setIsRefreshing(true)
@@ -423,12 +426,12 @@ export function StudentWorkspace({ profile, preview = false }: StudentWorkspaceP
           <p className="workspace-eyebrow">Learning in the field</p>
           <h2 id="student-workspace-title">{preview ? 'Student perspective' : 'Your projects'}</h2>
         </div>
-        <button className="workspace-secondary-button" disabled={isLoading || isRefreshing} onClick={() => void refresh()} type="button">
+        <button className="workspace-secondary-button" disabled={preview || isLoading || isRefreshing} onClick={() => void refresh()} type="button">
           <RefreshCw size={15} aria-hidden="true" /> Refresh
         </button>
       </div>
 
-      {preview && <InlineNotice kind="success">Read-only admin preview. Project claims and hour submissions are disabled; sign in with a student account to make changes.</InlineNotice>}
+      {preview && <InlineNotice kind="success">Read-only preview. Live student records are intentionally not loaded; sign in with a student account to view real opportunities and hours.</InlineNotice>}
       {errorMessage && <InlineNotice>{errorMessage}</InlineNotice>}
       {successMessage && <InlineNotice kind="success">{successMessage}</InlineNotice>}
 
@@ -580,7 +583,7 @@ export function ResidentWorkspace({ profile, preview = false }: StudentWorkspace
   const [taskIndex, setTaskIndex] = useState(0)
   const [location, setLocation] = useState('')
   const [notes, setNotes] = useState('')
-  const [isLoading, setIsLoading] = useState(true)
+  const [isLoading, setIsLoading] = useState(!preview)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isRefreshing, setIsRefreshing] = useState(false)
   const [completingId, setCompletingId] = useState<string | null>(null)
@@ -603,6 +606,9 @@ export function ResidentWorkspace({ profile, preview = false }: StudentWorkspace
   }
 
   useEffect(() => {
+    if (preview) {
+      return
+    }
     let active = true
     void loadProjects()
       .then((projects) => {
@@ -617,7 +623,7 @@ export function ResidentWorkspace({ profile, preview = false }: StudentWorkspace
     return () => {
       active = false
     }
-  }, [loadProjects])
+  }, [loadProjects, preview])
 
   async function refresh() {
     setIsRefreshing(true)
@@ -716,9 +722,9 @@ export function ResidentWorkspace({ profile, preview = false }: StudentWorkspace
     <section className="role-workspace" aria-labelledby="resident-workspace-title">
       <div className="workspace-heading">
         <div><p className="workspace-eyebrow">Community help, thoughtfully matched</p><h2 id="resident-workspace-title">{preview ? 'Resident perspective' : 'Your projects'}</h2></div>
-        <button className="workspace-secondary-button" disabled={isLoading || isRefreshing} onClick={() => void refresh()} type="button"><RefreshCw size={15} aria-hidden="true" />Refresh</button>
+        <button className="workspace-secondary-button" disabled={preview || isLoading || isRefreshing} onClick={() => void refresh()} type="button"><RefreshCw size={15} aria-hidden="true" />Refresh</button>
       </div>
-      {preview && <InlineNotice kind="success">Read-only admin preview. Posting and completion updates are disabled; sign in with a resident account to make changes.</InlineNotice>}
+      {preview && <InlineNotice kind="success">Read-only preview. Live resident postings are intentionally not loaded; sign in with a resident account to view or manage real projects.</InlineNotice>}
       {errorMessage && <InlineNotice>{errorMessage}</InlineNotice>}
       {successMessage && <InlineNotice kind="success">{successMessage}</InlineNotice>}
 
@@ -819,7 +825,7 @@ interface PlacementWorkspaceProps extends WorkspaceProps {
 export function PlacementWorkspace({ profile, preview = false }: PlacementWorkspaceProps) {
   const [opportunities, setOpportunities] = useState<OpportunitySnapshot[]>([])
   const [interests, setInterests] = useState<InterestSnapshot[]>([])
-  const [isLoading, setIsLoading] = useState(true)
+  const [isLoading, setIsLoading] = useState(!preview)
   const [requestingId, setRequestingId] = useState<string | null>(null)
   const [errorMessage, setErrorMessage] = useState('')
   const [successMessage, setSuccessMessage] = useState('')
@@ -846,6 +852,9 @@ export function PlacementWorkspace({ profile, preview = false }: PlacementWorksp
   }, [profile.id])
 
   useEffect(() => {
+    if (preview) {
+      return
+    }
     let active = true
     void loadPlacements()
       .then((data) => {
@@ -864,7 +873,7 @@ export function PlacementWorkspace({ profile, preview = false }: PlacementWorksp
     return () => {
       active = false
     }
-  }, [loadPlacements])
+  }, [loadPlacements, preview])
 
   async function requestIntroduction(opportunity: OpportunitySnapshot) {
     setRequestingId(opportunity.id)
@@ -902,7 +911,7 @@ export function PlacementWorkspace({ profile, preview = false }: PlacementWorksp
           <h2 id="placement-workspace-title">{preview ? 'Student placement view' : 'Industry placements'}</h2>
         </div>
       </div>
-      {preview && <InlineNotice kind="success">Read-only admin preview. Placement interest requests are disabled.</InlineNotice>}
+      {preview && <InlineNotice kind="success">Read-only preview. Live student placement data is intentionally not loaded; sign in with a student account to view approved opportunities.</InlineNotice>}
       {errorMessage && <InlineNotice>{errorMessage}</InlineNotice>}
       {successMessage && <InlineNotice kind="success">{successMessage}</InlineNotice>}
       <div className="placement-safety-banner">
@@ -971,7 +980,7 @@ export function IndustryPartnerWorkspace({ profile, preview = false }: Placement
   const [location, setLocation] = useState('')
   const [compensationStatus, setCompensationStatus] = useState<OpportunitySnapshot['compensation_status']>('to_be_determined')
   const [interestCounts, setInterestCounts] = useState<Map<string, number>>(new Map())
-  const [isLoading, setIsLoading] = useState(true)
+  const [isLoading, setIsLoading] = useState(!preview)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [closingId, setClosingId] = useState<string | null>(null)
   const [errorMessage, setErrorMessage] = useState('')
@@ -1004,6 +1013,9 @@ export function IndustryPartnerWorkspace({ profile, preview = false }: Placement
   }, [profile.id])
 
   useEffect(() => {
+    if (preview) {
+      return
+    }
     let active = true
     void loadPartnerWorkspace()
       .then((data) => {
@@ -1022,7 +1034,7 @@ export function IndustryPartnerWorkspace({ profile, preview = false }: Placement
     return () => {
       active = false
     }
-  }, [loadPartnerWorkspace])
+  }, [loadPartnerWorkspace, preview])
 
   async function createOpportunity(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
@@ -1100,7 +1112,7 @@ export function IndustryPartnerWorkspace({ profile, preview = false }: Placement
       <div className="workspace-heading">
         <div><p className="workspace-eyebrow">Share skills and supervised learning</p><h2 id="partner-workspace-title">{preview ? 'Industry partner view' : 'Learning placements'}</h2></div>
       </div>
-      {preview && <InlineNotice kind="success">Read-only admin preview. Listing and close actions are disabled.</InlineNotice>}
+      {preview && <InlineNotice kind="success">Read-only preview. Live partner listings and interest counts are intentionally not loaded.</InlineNotice>}
       {errorMessage && <InlineNotice>{errorMessage}</InlineNotice>}
       {successMessage && <InlineNotice kind="success">{successMessage}</InlineNotice>}
       <div className="placement-safety-banner">
@@ -1228,7 +1240,7 @@ export function PartnerReviewQueue({ teacherId, readOnly = false }: PartnerRevie
   const [interests, setInterests] = useState<InterestSnapshot[]>([])
   const [studentNames, setStudentNames] = useState<Map<string, string>>(new Map())
   const [opportunityTitles, setOpportunityTitles] = useState<Map<string, string>>(new Map())
-  const [isLoading, setIsLoading] = useState(true)
+  const [isLoading, setIsLoading] = useState(!readOnly)
   const [actionId, setActionId] = useState<string | null>(null)
   const [errorMessage, setErrorMessage] = useState('')
   const [successMessage, setSuccessMessage] = useState('')
@@ -1299,6 +1311,9 @@ export function PartnerReviewQueue({ teacherId, readOnly = false }: PartnerRevie
   }
 
   useEffect(() => {
+    if (readOnly) {
+      return
+    }
     let active = true
     void fetchReviewData()
       .then((data) => {
@@ -1313,7 +1328,7 @@ export function PartnerReviewQueue({ teacherId, readOnly = false }: PartnerRevie
     return () => {
       active = false
     }
-  }, [fetchReviewData])
+  }, [fetchReviewData, readOnly])
 
   async function reviewListing(opportunity: OpportunitySnapshot, decision: 'approved' | 'rejected') {
     setActionId(opportunity.id)
@@ -1384,11 +1399,11 @@ export function PartnerReviewQueue({ teacherId, readOnly = false }: PartnerRevie
     <section className="teacher-review" aria-labelledby="partner-review-title">
       <div className="review-toolbar">
         <p id="partner-review-title"><BriefcaseBusiness aria-hidden="true" size={17} /> {readOnly ? 'Partner review preview' : 'Industry placement review'}</p>
-        <button className="review-refresh" disabled={isLoading} onClick={() => void refresh()} type="button">
+        <button className="review-refresh" disabled={readOnly || isLoading} onClick={() => void refresh()} type="button">
           <RefreshCw aria-hidden="true" size={15} />{isLoading ? 'Loading...' : 'Refresh'}
         </button>
       </div>
-      {readOnly && <p className="review-message review-success">Read-only admin preview. Decisions are disabled in preview mode.</p>}
+      {readOnly && <p className="review-message review-success">Read-only preview. Live partner review records are not loaded. Sign in with a teacher account to access the real queue.</p>}
       {errorMessage && <p className="review-message review-error" role="alert">{errorMessage}</p>}
       {successMessage && <p className="review-message review-success" role="status">{successMessage}</p>}
       {isLoading ? (
@@ -1464,7 +1479,7 @@ interface AdminOverviewProps {
 }
 
 export function AdminOverview({ onOpenMode }: AdminOverviewProps) {
-  const [metrics, setMetrics] = useState<{
+  type AdminMetrics = {
     students: number
     residents: number
     teachers: number
@@ -1474,47 +1489,54 @@ export function AdminOverview({ onOpenMode }: AdminOverviewProps) {
     pendingHours: number
     pendingPlacements: number
     pendingPlacementInterests: number
-  } | null>(null)
+  }
+
+  const [metrics, setMetrics] = useState<AdminMetrics | null>(null)
   const [errorMessage, setErrorMessage] = useState('')
   const [isLoading, setIsLoading] = useState(true)
   const [isRefreshing, setIsRefreshing] = useState(false)
 
   const loadMetrics = useCallback(async () => {
-    const [students, residents, teachers, partners, admins, projects, hours, placements, interests] = await Promise.all([
-      supabase.from('profiles').select('id', { count: 'exact', head: true }).eq('role', 'student'),
-      supabase.from('profiles').select('id', { count: 'exact', head: true }).eq('role', 'resident'),
-      supabase.from('profiles').select('id', { count: 'exact', head: true }).eq('role', 'teacher'),
-      supabase.from('profiles').select('id', { count: 'exact', head: true }).eq('role', 'industry_partner'),
-      supabase.from('profiles').select('id', { count: 'exact', head: true }).eq('role', 'admin'),
-      supabase.from('projects').select('id', { count: 'exact', head: true }).eq('status', 'pending'),
-      supabase.from('field_hours').select('id', { count: 'exact', head: true }).eq('status', 'pending'),
-      supabase.from('partner_opportunities').select('id', { count: 'exact', head: true }).eq('status', 'pending'),
-      supabase.from('placement_interests').select('id', { count: 'exact', head: true }).eq('status', 'pending'),
-    ])
-    const failed = [
-      students.error,
-      residents.error,
-      teachers.error,
-      partners.error,
-      admins.error,
-      projects.error,
-      hours.error,
-      placements.error,
-      interests.error,
-    ].find(Boolean)
-    if (failed) throw failed
-    return {
-      students: students.count ?? 0,
-      residents: residents.count ?? 0,
-      teachers: teachers.count ?? 0,
-      industryPartners: partners.count ?? 0,
-      admins: admins.count ?? 0,
-      pendingProjects: projects.count ?? 0,
-      pendingHours: hours.count ?? 0,
-      pendingPlacements: placements.count ?? 0,
-      pendingPlacementInterests: interests.count ?? 0,
+    const { data, error } = await supabase.rpc('admin_dashboard_metrics')
+    if (error) throw error
+
+    const row = Array.isArray(data) ? recordOf(data[0]) : null
+    if (!row) throw new Error('The admin metrics response was empty or invalid.')
+
+    const count = (key: string) => {
+      const value = Number(row[key])
+      if (!Number.isSafeInteger(value) || value < 0) {
+        throw new Error('The admin metrics response contained an invalid count.')
+      }
+      return value
     }
+
+    return {
+      students: count('students'),
+      residents: count('residents'),
+      teachers: count('teachers'),
+      industryPartners: count('industry_partners'),
+      admins: count('admins'),
+      pendingProjects: count('pending_projects'),
+      pendingHours: count('pending_hours'),
+      pendingPlacements: count('pending_placements'),
+      pendingPlacementInterests: count('pending_placement_interests'),
+    } satisfies AdminMetrics
   }, [])
+
+  function explainMetricsError(error: unknown) {
+    const code =
+      typeof error === 'object' && error !== null && 'code' in error
+        ? error.code
+        : undefined
+    if (code === 'PGRST202' || code === '42883') {
+      return 'Admin metrics are not installed in Supabase yet. Apply the latest Google onboarding and admin metrics migration, then refresh.'
+    }
+    if (code === '42501') {
+      return 'Supabase denied admin metrics access. Confirm this profile role is admin and that the latest admin metrics migration is applied.'
+    }
+    return error instanceof Error ? error.message : 'Could not load admin metrics.'
+  }
 
   async function refreshMetrics() {
     setIsRefreshing(true)
@@ -1522,7 +1544,7 @@ export function AdminOverview({ onOpenMode }: AdminOverviewProps) {
       setMetrics(await loadMetrics())
       setErrorMessage('')
     } catch (error) {
-      setErrorMessage(error instanceof Error ? error.message : 'Could not refresh admin metrics.')
+      setErrorMessage(explainMetricsError(error))
     } finally {
       setIsRefreshing(false)
     }
@@ -1538,7 +1560,7 @@ export function AdminOverview({ onOpenMode }: AdminOverviewProps) {
         }
       })
       .catch((error: unknown) => {
-        if (active) setErrorMessage(error instanceof Error ? error.message : 'Could not load admin metrics.')
+        if (active) setErrorMessage(explainMetricsError(error))
       })
       .finally(() => {
         if (active) setIsLoading(false)

@@ -52,6 +52,9 @@ interface ClassroomPerson {
 }
 
 const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLASSROOM_CLIENT_ID?.trim() ?? ''
+const HAS_VALID_GOOGLE_CLIENT_ID =
+  /^[0-9]+-[A-Za-z0-9_-]+\.apps\.googleusercontent\.com$/.test(GOOGLE_CLIENT_ID) &&
+  !/your-|placeholder|replace/i.test(GOOGLE_CLIENT_ID)
 const CLASSROOM_SCOPES = [
   'https://www.googleapis.com/auth/classroom.courses.readonly',
   'https://www.googleapis.com/auth/classroom.rosters.readonly',
@@ -252,8 +255,8 @@ export function GoogleClassroomWorkspace() {
   }, [])
 
   async function connectClassroom() {
-    if (!GOOGLE_CLIENT_ID) {
-      setErrorMessage('Google Classroom is not configured. Add VITE_GOOGLE_CLASSROOM_CLIENT_ID to .env.local and restart Vite.')
+    if (!HAS_VALID_GOOGLE_CLIENT_ID) {
+      setErrorMessage('Google Classroom needs a real Google OAuth Web client ID. Replace the placeholder in VITE_GOOGLE_CLASSROOM_CLIENT_ID, add this site under Authorized JavaScript origins in Google Cloud, then restart Vite.')
       return
     }
 
@@ -381,9 +384,9 @@ export function GoogleClassroomWorkspace() {
         <p>Roster data is read-only and kept in browser memory for this session. This app does not save Google names, emails, or class rosters to Supabase.</p>
       </div>
 
-      {!GOOGLE_CLIENT_ID && (
+      {!HAS_VALID_GOOGLE_CLIENT_ID && (
         <p className="classroom-setup">
-          Setup needed: configure <code>VITE_GOOGLE_CLASSROOM_CLIENT_ID</code> and enable the Google Classroom API in Google Cloud.
+          Setup needed: replace the placeholder in <code>VITE_GOOGLE_CLASSROOM_CLIENT_ID</code> with a real Google OAuth Web client ID, authorize this site’s origin, and enable the Google Classroom API.
         </p>
       )}
       {errorMessage && <p className="classroom-feedback is-error" role="alert">{errorMessage}</p>}

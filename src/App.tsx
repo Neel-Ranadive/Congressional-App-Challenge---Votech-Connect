@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import type { Session } from '@supabase/supabase-js'
 import Auth from './components/Auth'
 import Dashboard from './components/Dashboard'
+import GoogleProfileSetup from './components/GoogleProfileSetup'
 import PasswordUpdate from './components/PasswordUpdate'
 import { supabase } from './lib/supabaseClient'
 import { isUserRole, type Profile } from './types/models'
@@ -15,6 +16,7 @@ type AuthState =
 
 type ProfileState =
   | { status: 'loading' }
+  | { status: 'onboarding'; userId: string }
   | { status: 'ready'; userId: string; profile: Profile }
   | { status: 'error'; userId: string; message: string }
 
@@ -35,6 +37,7 @@ function App() {
   const [profileState, setProfileState] = useState<ProfileState>({ status: 'loading' })
   const [signOutError, setSignOutError] = useState('')
   const [isPasswordRecovery, setIsPasswordRecovery] = useState(false)
+  const [profileRefreshVersion, setProfileRefreshVersion] = useState(0)
 
   useEffect(() => {
     let isActive = true
@@ -76,6 +79,8 @@ function App() {
   }, [])
 
   const userId = authState.status === 'signed-in' ? authState.session.user.id : null
+  const userProvider =
+    authState.status === 'signed-in' ? authState.session.user.app_metadata.provider : null
 
   useEffect(() => {
     if (!userId) return
@@ -95,11 +100,15 @@ function App() {
         if (error) {
           setProfileState({ status: 'error', userId: authenticatedUserId, message: error.message })
         } else if (!data) {
-          setProfileState({
-            status: 'error',
-            userId: authenticatedUserId,
-            message: 'Your account profile was not found. Confirm that the profile-creation trigger is enabled, then sign in again.',
-          })
+          if (userProvider === 'google') {
+            setProfileState({ status: 'onboarding', userId: authenticatedUserId })
+          } else {
+            setProfileState({
+              status: 'error',
+              userId: authenticatedUserId,
+              message: 'Your account profile was not found. Confirm that the profile-creation trigger is enabled, then sign in again.',
+            })
+          }
         } else if (!isProfile(data)) {
           setProfileState({
             status: 'error',
@@ -124,7 +133,7 @@ function App() {
     return () => {
       isActive = false
     }
-  }, [userId])
+  }, [userId, userProvider, profileRefreshVersion])
 
   async function signOut() {
     const { error } = await supabase.auth.signOut()
@@ -166,11 +175,19 @@ function App() {
     return <PasswordUpdate onUpdated={() => setIsPasswordRecovery(false)} />
   }
 
-  if (profileState.status === 'loading' || profileState.userId !== userId) {
-    return <main className="app-state" role="status">Loading your account...</main>
+  if (profileState.status === 'onboarding' && profileState.userId === userId) {
+    const user = authState.session.user
+    const metadataName = user.user_metadata.full_name ?? user.user_metadata.name
+    return (
+      <GoogleProfileSetup
+        email={user.email ?? ''}
+        initialName={typeof metadataName === 'string' ? metadataName : ''}
+        onComplete={() => setProfileRefreshVersion((version) => version + 1)}
+      />
+    )
   }
 
-  if (profileState.status === 'error') {
+  if (profileState.status === 'error' && profileState.userId === userId) {
     return (
       <main className="app-state">
         <section className="app-state-card">
@@ -183,6 +200,10 @@ function App() {
         </section>
       </main>
     )
+  }
+
+  if (profileState.status !== 'ready' || profileState.userId !== userId) {
+    return <main className="app-state" role="status">Loading your account...</main>
   }
 
   return <Dashboard profile={profileState.profile} onSignOut={signOut} />

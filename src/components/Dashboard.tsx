@@ -231,7 +231,7 @@ function TeacherReviewQueue({ teacherId, readOnly = false }: TeacherReviewQueueP
   const [fieldHours, setFieldHours] = useState<FieldHour[]>([])
   const [studentNames, setStudentNames] = useState<Map<string, string>>(new Map())
   const [projectTitles, setProjectTitles] = useState<Map<string, string>>(new Map())
-  const [isLoading, setIsLoading] = useState(true)
+  const [isLoading, setIsLoading] = useState(!readOnly)
   const [projectActionId, setProjectActionId] = useState<string | null>(null)
   const [assignmentActionId, setAssignmentActionId] = useState<string | null>(null)
   const [hourActionId, setHourActionId] = useState<string | null>(null)
@@ -327,6 +327,9 @@ function TeacherReviewQueue({ teacherId, readOnly = false }: TeacherReviewQueueP
   }
 
   useEffect(() => {
+    if (readOnly) {
+      return
+    }
     let isActive = true
     void fetchQueue()
       .then((data) => {
@@ -341,7 +344,7 @@ function TeacherReviewQueue({ teacherId, readOnly = false }: TeacherReviewQueueP
     return () => {
       isActive = false
     }
-  }, [fetchQueue])
+  }, [fetchQueue, readOnly])
 
   function refreshQueue() {
     setIsLoading(true)
@@ -450,7 +453,7 @@ function TeacherReviewQueue({ teacherId, readOnly = false }: TeacherReviewQueueP
         <p><ShieldCheck aria-hidden="true" size={17} /> {readOnly ? 'Teacher workspace preview' : 'Teacher review queue'}</p>
         <button
           className="review-refresh"
-          disabled={isLoading}
+          disabled={readOnly || isLoading}
           onClick={refreshQueue}
           type="button"
         >
@@ -459,7 +462,7 @@ function TeacherReviewQueue({ teacherId, readOnly = false }: TeacherReviewQueueP
         </button>
       </div>
 
-      {readOnly && <p className="review-message review-success">Read-only admin preview. Approval actions are disabled and no records can be changed from this view.</p>}
+      {readOnly && <p className="review-message review-success">Read-only preview. Live teacher review records are not loaded. Sign in with a teacher account to access the real review queue.</p>}
       {errorMessage && <p className="review-message review-error" role="alert">{errorMessage}</p>}
       {statusMessage && <p className="review-message review-success" role="status">{statusMessage}</p>}
 
@@ -691,11 +694,10 @@ function Dashboard({ profile, onSignOut }: DashboardProps) {
               <ResidentWorkspace profile={{ ...profile, role: 'resident' }} preview />
             )}
             {adminView === 'teacher' && (
-              <>
-                <GoogleClassroomWorkspace />
-                <TeacherReviewQueue teacherId={profile.id} readOnly />
-                <PartnerReviewQueue teacherId={profile.id} readOnly />
-              </>
+              <p className="review-message review-success">
+                Teacher preview does not access teacher-only records or connect to Google Classroom.
+                Sign in with an authorized teacher account to use those tools.
+              </p>
             )}
             {adminView === 'industry_partner' && (
               <IndustryPartnerWorkspace profile={{ ...profile, role: 'industry_partner' }} preview />

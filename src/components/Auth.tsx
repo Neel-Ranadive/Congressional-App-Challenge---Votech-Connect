@@ -189,7 +189,7 @@ function Auth() {
             </button>
           </div>}
 
-          {mode === 'sign-in' && (
+          {(mode === 'sign-in' || mode === 'sign-up') && (
             <>
               <button
                 className="google-sign-in-button"
@@ -198,9 +198,11 @@ function Auth() {
                 type="button"
               >
                 <span className="google-mark" aria-hidden="true">G</span>
-                Continue with Google
+                {isSignUp ? 'Create account with Google' : 'Continue with Google'}
               </button>
-              <div className="auth-divider" aria-hidden="true"><span>or sign in with email</span></div>
+              <div className="auth-divider" aria-hidden="true">
+                <span>{isSignUp ? 'or create an account with email' : 'or sign in with email'}</span>
+              </div>
             </>
           )}
 
