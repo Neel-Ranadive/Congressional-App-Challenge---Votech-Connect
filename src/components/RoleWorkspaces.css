@@ -16,6 +16,13 @@
   margin-bottom: 18px;
 }
 
+.admin-metric-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
 .workspace-eyebrow {
   margin: 0 0 5px;
   color: #718078;
@@ -660,6 +667,11 @@
 @media (max-width: 480px) {
   .workspace-heading {
     align-items: flex-start;
+  }
+
+  .admin-metric-actions {
+    align-items: stretch;
+    flex-direction: column;
   }
 
   .student-stat-grid,

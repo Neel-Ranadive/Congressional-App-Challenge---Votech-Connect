@@ -54,6 +54,186 @@ interface InterestSnapshot {
   created_at: string
 }
 
+const DEMO_STUDENT_ID = 'demo-student-avery'
+const DEMO_TEACHER_ID = 'demo-teacher-jordan'
+const DEMO_RESIDENT_ID = 'demo-resident-morgan'
+const DEMO_PARTNER_ID = 'demo-partner-northstar'
+
+const DEMO_AVAILABLE_PROJECTS: ProjectSnapshot[] = [
+  {
+    id: 'demo-project-community-shelf',
+    resident_id: DEMO_RESIDENT_ID,
+    assigned_student_id: null,
+    title: 'Repair loose interior trim',
+    description: 'A supervised repair of loose, non-structural interior trim.',
+    trade_category: 'Carpentry',
+    location: 'Morristown',
+    status: 'approved',
+    created_at: '2026-10-20T14:00:00.000Z',
+  },
+  {
+    id: 'demo-project-device-setup-open',
+    resident_id: 'demo-resident-lee',
+    assigned_student_id: null,
+    title: 'Set up a personal device',
+    description: 'Help set up a personal device using the owner’s guidance; do not handle private credentials.',
+    trade_category: 'Technology',
+    location: 'Parsippany',
+    status: 'approved',
+    created_at: '2026-10-18T14:00:00.000Z',
+  },
+]
+
+const DEMO_STUDENT_PROJECTS: ProjectSnapshot[] = [
+  {
+    id: 'demo-project-library-shelf',
+    resident_id: DEMO_RESIDENT_ID,
+    assigned_student_id: DEMO_STUDENT_ID,
+    title: 'Repair a community library shelf',
+    description: 'A teacher-approved, supervised repair of loose interior trim and shelving.',
+    trade_category: 'Carpentry',
+    location: 'Morristown',
+    status: 'in_progress',
+    created_at: '2026-10-14T14:00:00.000Z',
+  },
+  {
+    id: 'demo-project-device-setup',
+    resident_id: 'demo-resident-lee',
+    assigned_student_id: DEMO_STUDENT_ID,
+    title: 'Set up a personal device',
+    description: 'A student claim awaiting teacher approval before work begins.',
+    trade_category: 'Technology',
+    location: 'Parsippany',
+    status: 'approved',
+    created_at: '2026-10-17T14:00:00.000Z',
+  },
+]
+
+const DEMO_HOURS: HourSnapshot[] = [
+  {
+    id: 'demo-hours-approved',
+    student_id: DEMO_STUDENT_ID,
+    project_id: 'demo-project-library-shelf',
+    hours_logged: 2.5,
+    status: 'approved',
+    teacher_id: DEMO_TEACHER_ID,
+    created_at: '2026-10-19T14:00:00.000Z',
+  },
+  {
+    id: 'demo-hours-pending',
+    student_id: DEMO_STUDENT_ID,
+    project_id: 'demo-project-library-shelf',
+    hours_logged: 1.5,
+    status: 'pending',
+    teacher_id: null,
+    created_at: '2026-10-21T14:00:00.000Z',
+  },
+]
+
+const DEMO_RESIDENT_PROJECTS: ProjectSnapshot[] = [
+  {
+    id: 'demo-resident-project-pending',
+    resident_id: DEMO_RESIDENT_ID,
+    assigned_student_id: null,
+    title: 'Fix cabinet hinges',
+    description: 'A supervised, non-structural cabinet hinge adjustment.',
+    trade_category: 'Carpentry',
+    location: 'Morristown',
+    status: 'pending',
+    created_at: '2026-10-21T14:00:00.000Z',
+  },
+  {
+    ...DEMO_STUDENT_PROJECTS[0],
+    status: 'in_progress',
+  },
+  {
+    id: 'demo-resident-project-completed',
+    resident_id: DEMO_RESIDENT_ID,
+    assigned_student_id: 'demo-student-sam',
+    title: 'Wash and wax car details',
+    description: 'Exterior cleaning and detailing only; no mechanical or under-vehicle work.',
+    trade_category: 'Automotive',
+    location: 'Morris Plains',
+    status: 'completed',
+    created_at: '2026-10-10T14:00:00.000Z',
+  },
+]
+
+const DEMO_OPPORTUNITIES: OpportunitySnapshot[] = [
+  {
+    id: 'demo-placement-carpentry',
+    partner_id: DEMO_PARTNER_ID,
+    organization_name: 'Northstar Community Workshop',
+    title: 'Introductory carpentry mentorship',
+    trade_category: 'Carpentry',
+    description: 'Observe a skilled mentor preparing materials and assembling a small community project.',
+    learning_goals: 'Practice measuring, material identification, and safe tool handling with direct supervision.',
+    supervision_plan: 'A vetted adult mentor remains with the student throughout each scheduled session.',
+    location: 'Morris County',
+    compensation_status: 'to_be_determined',
+    status: 'approved',
+    created_at: '2026-10-16T14:00:00.000Z',
+  },
+  {
+    id: 'demo-placement-it',
+    partner_id: 'demo-partner-tech',
+    organization_name: 'Garden State Tech Collective',
+    title: 'Device refurbishment learning day',
+    trade_category: 'Information technology',
+    description: 'Learn how a supervised team assesses and prepares donated devices for reuse.',
+    learning_goals: 'Explore hardware inventory, basic diagnostics, and responsible e-waste practices.',
+    supervision_plan: 'The program lead supervises students in a school-approved group setting.',
+    location: 'Parsippany',
+    compensation_status: 'unpaid_educational',
+    status: 'approved',
+    created_at: '2026-10-12T14:00:00.000Z',
+  },
+]
+
+const DEMO_INTERESTS: InterestSnapshot[] = [
+  {
+    id: 'demo-interest-approved',
+    opportunity_id: 'demo-placement-carpentry',
+    student_id: DEMO_STUDENT_ID,
+    status: 'approved',
+    teacher_id: DEMO_TEACHER_ID,
+    created_at: '2026-10-20T14:00:00.000Z',
+  },
+]
+
+const DEMO_PENDING_INTERESTS: InterestSnapshot[] = [
+  {
+    id: 'demo-interest-pending',
+    opportunity_id: 'demo-placement-pending',
+    student_id: 'demo-student-sam',
+    status: 'pending',
+    teacher_id: null,
+    created_at: '2026-10-22T14:00:00.000Z',
+  },
+]
+
+const DEMO_PARTNER_OPPORTUNITIES: OpportunitySnapshot[] = [
+  ...DEMO_OPPORTUNITIES.slice(0, 1),
+  {
+    id: 'demo-placement-pending',
+    partner_id: DEMO_PARTNER_ID,
+    organization_name: 'Northstar Community Workshop',
+    title: 'Introductory cabinetmaking observation',
+    trade_category: 'Carpentry',
+    description: 'Observe a supervised workshop demonstration focused on measuring and material selection.',
+    learning_goals: 'Understand basic layout, measurement, and shop organization.',
+    supervision_plan: 'A vetted adult mentor remains present for the full session.',
+    location: 'Morris County',
+    compensation_status: 'to_be_determined',
+    status: 'pending',
+    created_at: '2026-10-22T14:00:00.000Z',
+  },
+]
+
+const DEMO_PARTNER_INTEREST_COUNTS = new Map([
+  ['demo-placement-carpentry', 2],
+])
+
 function recordOf(value: unknown): Record<string, unknown> | null {
   return typeof value === 'object' && value !== null
     ? value as Record<string, unknown>
@@ -235,10 +415,18 @@ interface StudentWorkspaceData {
 }
 
 export function StudentWorkspace({ profile, preview = false }: StudentWorkspaceProps) {
-  const [availableProjects, setAvailableProjects] = useState<ProjectSnapshot[]>([])
-  const [myProjects, setMyProjects] = useState<ProjectSnapshot[]>([])
-  const [myHours, setMyHours] = useState<HourSnapshot[]>([])
-  const [projectTitles, setProjectTitles] = useState<Map<string, string>>(new Map())
+  const [availableProjects, setAvailableProjects] = useState<ProjectSnapshot[]>(() =>
+    preview ? DEMO_AVAILABLE_PROJECTS : [],
+  )
+  const [myProjects, setMyProjects] = useState<ProjectSnapshot[]>(() =>
+    preview ? DEMO_STUDENT_PROJECTS : [],
+  )
+  const [myHours, setMyHours] = useState<HourSnapshot[]>(() => preview ? DEMO_HOURS : [])
+  const [projectTitles, setProjectTitles] = useState<Map<string, string>>(() =>
+    preview
+      ? new Map(DEMO_STUDENT_PROJECTS.map((project) => [project.id, project.title]))
+      : new Map(),
+  )
   const [isLoading, setIsLoading] = useState(!preview)
   const [isRefreshing, setIsRefreshing] = useState(false)
   const [claimingId, setClaimingId] = useState<string | null>(null)
@@ -431,7 +619,7 @@ export function StudentWorkspace({ profile, preview = false }: StudentWorkspaceP
         </button>
       </div>
 
-      {preview && <InlineNotice kind="success">Read-only preview. Live student records are intentionally not loaded; sign in with a student account to view real opportunities and hours.</InlineNotice>}
+      {preview && <InlineNotice kind="success">VIDEO DEMO — all names, projects, and hours shown here are fictional sample data. Nothing is saved to Supabase.</InlineNotice>}
       {errorMessage && <InlineNotice>{errorMessage}</InlineNotice>}
       {successMessage && <InlineNotice kind="success">{successMessage}</InlineNotice>}
 
@@ -579,7 +767,9 @@ const contactInfoPattern = /(?:\b[\w.+-]+@[\w.-]+\.[a-z]{2,}\b|\b(?:\+?1[\s.-]?)
 const unsafeTaskPattern = /\b(?:rewir(?:e|ing)|electrical panel|power panel|plumb(?:ing)?|gas line|load-bearing|structural|foundation|roof repair|brake repair|engine repair|boiler|furnace|sewer|demolition)\b/i
 
 export function ResidentWorkspace({ profile, preview = false }: StudentWorkspaceProps) {
-  const [projectRows, setProjectRows] = useState<ProjectSnapshot[]>([])
+  const [projectRows, setProjectRows] = useState<ProjectSnapshot[]>(() =>
+    preview ? DEMO_RESIDENT_PROJECTS : [],
+  )
   const [taskIndex, setTaskIndex] = useState(0)
   const [location, setLocation] = useState('')
   const [notes, setNotes] = useState('')
@@ -724,7 +914,7 @@ export function ResidentWorkspace({ profile, preview = false }: StudentWorkspace
         <div><p className="workspace-eyebrow">Community help, thoughtfully matched</p><h2 id="resident-workspace-title">{preview ? 'Resident perspective' : 'Your projects'}</h2></div>
         <button className="workspace-secondary-button" disabled={preview || isLoading || isRefreshing} onClick={() => void refresh()} type="button"><RefreshCw size={15} aria-hidden="true" />Refresh</button>
       </div>
-      {preview && <InlineNotice kind="success">Read-only preview. Live resident postings are intentionally not loaded; sign in with a resident account to view or manage real projects.</InlineNotice>}
+      {preview && <InlineNotice kind="success">VIDEO DEMO — fictional resident and project details for presentation only. Changes are disabled and nothing is saved.</InlineNotice>}
       {errorMessage && <InlineNotice>{errorMessage}</InlineNotice>}
       {successMessage && <InlineNotice kind="success">{successMessage}</InlineNotice>}
 
@@ -823,8 +1013,12 @@ interface PlacementWorkspaceProps extends WorkspaceProps {
 }
 
 export function PlacementWorkspace({ profile, preview = false }: PlacementWorkspaceProps) {
-  const [opportunities, setOpportunities] = useState<OpportunitySnapshot[]>([])
-  const [interests, setInterests] = useState<InterestSnapshot[]>([])
+  const [opportunities, setOpportunities] = useState<OpportunitySnapshot[]>(() =>
+    preview ? DEMO_OPPORTUNITIES : [],
+  )
+  const [interests, setInterests] = useState<InterestSnapshot[]>(() =>
+    preview ? DEMO_INTERESTS : [],
+  )
   const [isLoading, setIsLoading] = useState(!preview)
   const [requestingId, setRequestingId] = useState<string | null>(null)
   const [errorMessage, setErrorMessage] = useState('')
@@ -911,7 +1105,7 @@ export function PlacementWorkspace({ profile, preview = false }: PlacementWorksp
           <h2 id="placement-workspace-title">{preview ? 'Student placement view' : 'Industry placements'}</h2>
         </div>
       </div>
-      {preview && <InlineNotice kind="success">Read-only preview. Live student placement data is intentionally not loaded; sign in with a student account to view approved opportunities.</InlineNotice>}
+      {preview && <InlineNotice kind="success">VIDEO DEMO — partner opportunities and introduction status are fictional sample data. Nothing is saved to Supabase.</InlineNotice>}
       {errorMessage && <InlineNotice>{errorMessage}</InlineNotice>}
       {successMessage && <InlineNotice kind="success">{successMessage}</InlineNotice>}
       <div className="placement-safety-banner">
@@ -970,7 +1164,9 @@ export function PlacementWorkspace({ profile, preview = false }: PlacementWorksp
 const partnerTradeOptions = ['Carpentry', 'Automotive', 'Welding', 'Electrical', 'Plumbing', 'Information technology', 'Graphic design', 'Allied health', 'Other'] as const
 
 export function IndustryPartnerWorkspace({ profile, preview = false }: PlacementWorkspaceProps) {
-  const [opportunities, setOpportunities] = useState<OpportunitySnapshot[]>([])
+  const [opportunities, setOpportunities] = useState<OpportunitySnapshot[]>(() =>
+    preview ? DEMO_PARTNER_OPPORTUNITIES : [],
+  )
   const [organizationName, setOrganizationName] = useState('')
   const [title, setTitle] = useState('')
   const [tradeCategory, setTradeCategory] = useState<string>(partnerTradeOptions[0])
@@ -979,7 +1175,9 @@ export function IndustryPartnerWorkspace({ profile, preview = false }: Placement
   const [supervisionPlan, setSupervisionPlan] = useState('')
   const [location, setLocation] = useState('')
   const [compensationStatus, setCompensationStatus] = useState<OpportunitySnapshot['compensation_status']>('to_be_determined')
-  const [interestCounts, setInterestCounts] = useState<Map<string, number>>(new Map())
+  const [interestCounts, setInterestCounts] = useState<Map<string, number>>(() =>
+    preview ? new Map(DEMO_PARTNER_INTEREST_COUNTS) : new Map(),
+  )
   const [isLoading, setIsLoading] = useState(!preview)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [closingId, setClosingId] = useState<string | null>(null)
@@ -1112,7 +1310,7 @@ export function IndustryPartnerWorkspace({ profile, preview = false }: Placement
       <div className="workspace-heading">
         <div><p className="workspace-eyebrow">Share skills and supervised learning</p><h2 id="partner-workspace-title">{preview ? 'Industry partner view' : 'Learning placements'}</h2></div>
       </div>
-      {preview && <InlineNotice kind="success">Read-only preview. Live partner listings and interest counts are intentionally not loaded.</InlineNotice>}
+      {preview && <InlineNotice kind="success">VIDEO DEMO — fictional partner listings and aggregate counts. Changes are disabled and nothing is saved.</InlineNotice>}
       {errorMessage && <InlineNotice>{errorMessage}</InlineNotice>}
       {successMessage && <InlineNotice kind="success">{successMessage}</InlineNotice>}
       <div className="placement-safety-banner">
@@ -1236,10 +1434,22 @@ function PartnerReviewDecision({
 }
 
 export function PartnerReviewQueue({ teacherId, readOnly = false }: PartnerReviewQueueProps) {
-  const [listings, setListings] = useState<OpportunitySnapshot[]>([])
-  const [interests, setInterests] = useState<InterestSnapshot[]>([])
-  const [studentNames, setStudentNames] = useState<Map<string, string>>(new Map())
-  const [opportunityTitles, setOpportunityTitles] = useState<Map<string, string>>(new Map())
+  const [listings, setListings] = useState<OpportunitySnapshot[]>(() =>
+    readOnly ? [DEMO_PARTNER_OPPORTUNITIES[1]] : [],
+  )
+  const [interests, setInterests] = useState<InterestSnapshot[]>(() =>
+    readOnly ? DEMO_PENDING_INTERESTS : [],
+  )
+  const [studentNames, setStudentNames] = useState<Map<string, string>>(() =>
+    readOnly
+      ? new Map([[DEMO_PENDING_INTERESTS[0].student_id, 'Sam Rivera (fictional)']])
+      : new Map(),
+  )
+  const [opportunityTitles, setOpportunityTitles] = useState<Map<string, string>>(() =>
+    readOnly
+      ? new Map([[DEMO_PARTNER_OPPORTUNITIES[1].id, DEMO_PARTNER_OPPORTUNITIES[1].title]])
+      : new Map(),
+  )
   const [isLoading, setIsLoading] = useState(!readOnly)
   const [actionId, setActionId] = useState<string | null>(null)
   const [errorMessage, setErrorMessage] = useState('')
@@ -1403,7 +1613,7 @@ export function PartnerReviewQueue({ teacherId, readOnly = false }: PartnerRevie
           <RefreshCw aria-hidden="true" size={15} />{isLoading ? 'Loading...' : 'Refresh'}
         </button>
       </div>
-      {readOnly && <p className="review-message review-success">Read-only preview. Live partner review records are not loaded. Sign in with a teacher account to access the real queue.</p>}
+      {readOnly && <p className="review-message review-success">VIDEO DEMO — fictional partner listings and student names. Review actions are disabled; nothing is saved.</p>}
       {errorMessage && <p className="review-message review-error" role="alert">{errorMessage}</p>}
       {successMessage && <p className="review-message review-success" role="status">{successMessage}</p>}
       {isLoading ? (
@@ -1478,6 +1688,18 @@ interface AdminOverviewProps {
   onOpenMode: (mode: 'student' | 'resident' | 'teacher' | 'industry_partner') => void
 }
 
+const DEMO_ADMIN_METRICS = {
+  students: 48,
+  residents: 16,
+  teachers: 5,
+  industryPartners: 7,
+  admins: 1,
+  pendingProjects: 3,
+  pendingHours: 4,
+  pendingPlacements: 2,
+  pendingPlacementInterests: 2,
+}
+
 export function AdminOverview({ onOpenMode }: AdminOverviewProps) {
   type AdminMetrics = {
     students: number
@@ -1491,9 +1713,10 @@ export function AdminOverview({ onOpenMode }: AdminOverviewProps) {
     pendingPlacementInterests: number
   }
 
-  const [metrics, setMetrics] = useState<AdminMetrics | null>(null)
+  const [metrics, setMetrics] = useState<AdminMetrics | null>(DEMO_ADMIN_METRICS)
+  const [showDemoData, setShowDemoData] = useState(true)
   const [errorMessage, setErrorMessage] = useState('')
-  const [isLoading, setIsLoading] = useState(true)
+  const [isLoading, setIsLoading] = useState(false)
   const [isRefreshing, setIsRefreshing] = useState(false)
 
   const loadMetrics = useCallback(async () => {
@@ -1551,6 +1774,7 @@ export function AdminOverview({ onOpenMode }: AdminOverviewProps) {
   }
 
   useEffect(() => {
+    if (showDemoData) return
     let active = true
     void loadMetrics()
       .then((data) => {
@@ -1568,16 +1792,38 @@ export function AdminOverview({ onOpenMode }: AdminOverviewProps) {
     return () => {
       active = false
     }
-  }, [loadMetrics])
+  }, [loadMetrics, showDemoData])
 
   return (
     <section className="admin-overview-workspace" aria-labelledby="admin-overview-title">
       <div className="workspace-heading">
         <div><p className="workspace-eyebrow">District-wide oversight</p><h2 id="admin-overview-title">Operations overview</h2></div>
-        <button className="workspace-secondary-button" disabled={isLoading || isRefreshing} onClick={() => void refreshMetrics()} type="button">
-          <RefreshCw size={15} aria-hidden="true" />{isRefreshing ? 'Refreshing...' : 'Refresh counts'}
-        </button>
+        <div className="admin-metric-actions">
+          <button
+            className="workspace-secondary-button"
+            onClick={() => {
+              if (showDemoData) {
+                setShowDemoData(false)
+                setMetrics(null)
+                setErrorMessage('')
+                setIsLoading(true)
+              } else {
+                setShowDemoData(true)
+                setMetrics(DEMO_ADMIN_METRICS)
+                setErrorMessage('')
+                setIsLoading(false)
+              }
+            }}
+            type="button"
+          >
+            {showDemoData ? 'View live counts' : 'Use demo data'}
+          </button>
+          <button className="workspace-secondary-button" disabled={showDemoData || isLoading || isRefreshing} onClick={() => void refreshMetrics()} type="button">
+            <RefreshCw size={15} aria-hidden="true" />{isRefreshing ? 'Refreshing...' : 'Refresh counts'}
+          </button>
+        </div>
       </div>
+      {showDemoData && <InlineNotice kind="success">VIDEO DEMO — sample counts below are fictional, for presentation only, and are not stored in Supabase.</InlineNotice>}
       {errorMessage && <InlineNotice>{errorMessage}</InlineNotice>}
       <div className="admin-live-metrics">
         {[
@@ -1597,9 +1843,13 @@ export function AdminOverview({ onOpenMode }: AdminOverviewProps) {
           </article>
         ))}
       </div>
-      {!isLoading && !errorMessage && metrics && (
+      {!isLoading && metrics && (showDemoData || !errorMessage) && (
         <>
-          <p className="workspace-helper">Counts reflect rows visible under the current Supabase policies. They are not evidence of complete district-wide access unless the admin role is authorized by RLS.</p>
+          <p className="workspace-helper">
+            {showDemoData
+              ? 'These sample counts are fictional. Switch to live counts to request aggregate totals from Supabase.'
+              : 'Counts reflect rows returned by the secured admin metrics function.'}
+          </p>
           <div className="admin-shortcuts">
             <button onClick={() => onOpenMode('student')} type="button"><Clock3 size={16} aria-hidden="true" /> Open student workspace</button>
             <button onClick={() => onOpenMode('resident')} type="button"><Wrench size={16} aria-hidden="true" /> Open resident workspace</button>

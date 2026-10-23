@@ -55,6 +55,8 @@ The sign-in screen offers Google authentication through Supabase Auth. This is s
 
 Google OAuth consent settings, school Workspace restrictions, and the Supabase redirect allow list must all permit the account and app. Test the full redirect in a non-production project before use.
 
+If Google displays `Unsupported provider: provider is not enabled`, open the same Supabase project used by the app and enable **Authentication → Providers → Google**. Enter the OAuth client ID and client secret there, save, and try again. This error means Supabase has Google sign-in disabled; it is not fixed by changing the Classroom API setting.
+
 ## Google Classroom (optional, read-only)
 
 The teacher workspace can list classes and load class teacher/student rosters using the Google Classroom REST API. Names and emails stay in browser memory for the current session; this app does not write roster data into Supabase.
@@ -70,6 +72,10 @@ The teacher workspace can list classes and load class teacher/student rosters us
    ```
 
 The client ID is intended to be public in browser code. Replace the example value with the real OAuth **Web application** client ID from the same Google Cloud project, and ensure the app's exact origin is in **Authorized JavaScript origins**. Never put a Google client secret or Supabase service-role key in a `VITE_` variable. A teacher must connect a Google account that is authorized to view the class rosters. School Google Workspace policies, Classroom API enablement, OAuth consent status, and user permissions can still deny access. The application must display those errors rather than treating a failed sync as an empty roster.
+
+## Admin video demo
+
+Admin role previews use clearly labeled fictional sample records and do not write demo data to Supabase. The operations overview opens with sample counts for recording; use **View live counts** to request real aggregate metrics. Preview role buttons remain read-only and continue to use demo data.
 
 ## Current workflow boundaries
 

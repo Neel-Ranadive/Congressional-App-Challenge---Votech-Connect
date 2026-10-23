@@ -161,6 +161,40 @@ interface TeacherReviewQueueProps {
   readOnly?: boolean
 }
 
+const DEMO_REVIEW_PROJECT: Project = {
+  id: 'demo-teacher-pending-project',
+  resident_id: 'demo-resident-morgan',
+  assigned_student_id: null,
+  title: 'Fix cabinet hinges',
+  description: 'A supervised, non-structural cabinet hinge adjustment.',
+  trade_category: 'Carpentry',
+  location: 'Morristown',
+  status: 'pending',
+  created_at: '2026-10-22T14:00:00.000Z',
+}
+
+const DEMO_ASSIGNMENT_REQUEST: Project = {
+  id: 'demo-teacher-assignment',
+  resident_id: 'demo-resident-lee',
+  assigned_student_id: 'demo-student-avery',
+  title: 'Set up a personal device',
+  description: 'A supervised setup task; private credentials must not be handled.',
+  trade_category: 'Technology',
+  location: 'Parsippany',
+  status: 'approved',
+  created_at: '2026-10-21T14:00:00.000Z',
+}
+
+const DEMO_FIELD_HOUR: FieldHour = {
+  id: 'demo-teacher-hour',
+  student_id: 'demo-student-avery',
+  project_id: 'demo-project-library-shelf',
+  hours_logged: 1.5,
+  status: 'pending',
+  teacher_id: null,
+  created_at: '2026-10-22T14:00:00.000Z',
+}
+
 const projectApprovalChecks = [
   'I reviewed the task scope and confirmed it is on the approved low-risk task list.',
   'The location shown is a general area only; private address details are handled through school-approved procedures.',
@@ -226,11 +260,23 @@ function ApprovalGate({ checks, busy, readOnly = false, busyLabel, buttonLabel, 
 }
 
 function TeacherReviewQueue({ teacherId, readOnly = false }: TeacherReviewQueueProps) {
-  const [projects, setProjects] = useState<Project[]>([])
-  const [assignmentRequests, setAssignmentRequests] = useState<Project[]>([])
-  const [fieldHours, setFieldHours] = useState<FieldHour[]>([])
-  const [studentNames, setStudentNames] = useState<Map<string, string>>(new Map())
-  const [projectTitles, setProjectTitles] = useState<Map<string, string>>(new Map())
+  const [projects, setProjects] = useState<Project[]>(() =>
+    readOnly ? [DEMO_REVIEW_PROJECT] : [],
+  )
+  const [assignmentRequests, setAssignmentRequests] = useState<Project[]>(() =>
+    readOnly ? [DEMO_ASSIGNMENT_REQUEST] : [],
+  )
+  const [fieldHours, setFieldHours] = useState<FieldHour[]>(() =>
+    readOnly ? [DEMO_FIELD_HOUR] : [],
+  )
+  const [studentNames, setStudentNames] = useState<Map<string, string>>(() =>
+    readOnly ? new Map([['demo-student-avery', 'Avery Patel (fictional)']]) : new Map(),
+  )
+  const [projectTitles, setProjectTitles] = useState<Map<string, string>>(() =>
+    readOnly
+      ? new Map([[DEMO_FIELD_HOUR.project_id, 'Repair a community library shelf']])
+      : new Map(),
+  )
   const [isLoading, setIsLoading] = useState(!readOnly)
   const [projectActionId, setProjectActionId] = useState<string | null>(null)
   const [assignmentActionId, setAssignmentActionId] = useState<string | null>(null)
@@ -462,7 +508,7 @@ function TeacherReviewQueue({ teacherId, readOnly = false }: TeacherReviewQueueP
         </button>
       </div>
 
-      {readOnly && <p className="review-message review-success">Read-only preview. Live teacher review records are not loaded. Sign in with a teacher account to access the real review queue.</p>}
+      {readOnly && <p className="review-message review-success">VIDEO DEMO — fictional project, student, and hour records. Review actions are disabled; nothing is saved.</p>}
       {errorMessage && <p className="review-message review-error" role="alert">{errorMessage}</p>}
       {statusMessage && <p className="review-message review-success" role="status">{statusMessage}</p>}
 
@@ -694,10 +740,14 @@ function Dashboard({ profile, onSignOut }: DashboardProps) {
               <ResidentWorkspace profile={{ ...profile, role: 'resident' }} preview />
             )}
             {adminView === 'teacher' && (
-              <p className="review-message review-success">
-                Teacher preview does not access teacher-only records or connect to Google Classroom.
-                Sign in with an authorized teacher account to use those tools.
-              </p>
+              <>
+                <p className="review-message review-success">
+                  VIDEO DEMO — fictional teacher queues for presentation only. Actions are disabled;
+                  Google Classroom is not connected in this preview.
+                </p>
+                <TeacherReviewQueue teacherId={profile.id} readOnly />
+                <PartnerReviewQueue teacherId={profile.id} readOnly />
+              </>
             )}
             {adminView === 'industry_partner' && (
               <IndustryPartnerWorkspace profile={{ ...profile, role: 'industry_partner' }} preview />
