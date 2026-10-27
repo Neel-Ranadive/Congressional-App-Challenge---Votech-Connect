@@ -612,14 +612,14 @@ export function StudentWorkspace({ profile, preview = false }: StudentWorkspaceP
       <div className="workspace-heading">
         <div>
           <p className="workspace-eyebrow">Learning in the field</p>
-          <h2 id="student-workspace-title">{preview ? 'Student perspective' : 'Your projects'}</h2>
+          <h2 id="student-workspace-title">{preview ? 'Student workspace' : 'Your projects'}</h2>
         </div>
         <button className="workspace-secondary-button" disabled={preview || isLoading || isRefreshing} onClick={() => void refresh()} type="button">
           <RefreshCw size={15} aria-hidden="true" /> Refresh
         </button>
       </div>
 
-      {preview && <InlineNotice kind="success">VIDEO DEMO — all names, projects, and hours shown here are fictional sample data. Nothing is saved to Supabase.</InlineNotice>}
+      {preview && <InlineNotice kind="success">Preview mode: sample student records. Changes are not saved.</InlineNotice>}
       {errorMessage && <InlineNotice>{errorMessage}</InlineNotice>}
       {successMessage && <InlineNotice kind="success">{successMessage}</InlineNotice>}
 
@@ -911,10 +911,10 @@ export function ResidentWorkspace({ profile, preview = false }: StudentWorkspace
   return (
     <section className="role-workspace" aria-labelledby="resident-workspace-title">
       <div className="workspace-heading">
-        <div><p className="workspace-eyebrow">Community help, thoughtfully matched</p><h2 id="resident-workspace-title">{preview ? 'Resident perspective' : 'Your projects'}</h2></div>
+        <div><p className="workspace-eyebrow">Community help, thoughtfully matched</p><h2 id="resident-workspace-title">{preview ? 'Resident workspace' : 'Your projects'}</h2></div>
         <button className="workspace-secondary-button" disabled={preview || isLoading || isRefreshing} onClick={() => void refresh()} type="button"><RefreshCw size={15} aria-hidden="true" />Refresh</button>
       </div>
-      {preview && <InlineNotice kind="success">VIDEO DEMO — fictional resident and project details for presentation only. Changes are disabled and nothing is saved.</InlineNotice>}
+      {preview && <InlineNotice kind="success">Preview mode: sample resident projects. Changes are not saved.</InlineNotice>}
       {errorMessage && <InlineNotice>{errorMessage}</InlineNotice>}
       {successMessage && <InlineNotice kind="success">{successMessage}</InlineNotice>}
 
@@ -1102,10 +1102,10 @@ export function PlacementWorkspace({ profile, preview = false }: PlacementWorksp
       <div className="workspace-heading">
         <div>
           <p className="workspace-eyebrow">Trade learning, with school oversight</p>
-          <h2 id="placement-workspace-title">{preview ? 'Student placement view' : 'Industry placements'}</h2>
+          <h2 id="placement-workspace-title">{preview ? 'Student placements' : 'Industry placements'}</h2>
         </div>
       </div>
-      {preview && <InlineNotice kind="success">VIDEO DEMO — partner opportunities and introduction status are fictional sample data. Nothing is saved to Supabase.</InlineNotice>}
+      {preview && <InlineNotice kind="success">Preview mode: sample placement data. Changes are not saved.</InlineNotice>}
       {errorMessage && <InlineNotice>{errorMessage}</InlineNotice>}
       {successMessage && <InlineNotice kind="success">{successMessage}</InlineNotice>}
       <div className="placement-safety-banner">
@@ -1308,9 +1308,9 @@ export function IndustryPartnerWorkspace({ profile, preview = false }: Placement
   return (
     <section className="role-workspace" aria-labelledby="partner-workspace-title">
       <div className="workspace-heading">
-        <div><p className="workspace-eyebrow">Share skills and supervised learning</p><h2 id="partner-workspace-title">{preview ? 'Industry partner view' : 'Learning placements'}</h2></div>
+        <div><p className="workspace-eyebrow">Share skills and supervised learning</p><h2 id="partner-workspace-title">{preview ? 'Partner workspace' : 'Learning placements'}</h2></div>
       </div>
-      {preview && <InlineNotice kind="success">VIDEO DEMO — fictional partner listings and aggregate counts. Changes are disabled and nothing is saved.</InlineNotice>}
+      {preview && <InlineNotice kind="success">Preview mode: sample partner listings and counts. Changes are not saved.</InlineNotice>}
       {errorMessage && <InlineNotice>{errorMessage}</InlineNotice>}
       {successMessage && <InlineNotice kind="success">{successMessage}</InlineNotice>}
       <div className="placement-safety-banner">
@@ -1613,7 +1613,7 @@ export function PartnerReviewQueue({ teacherId, readOnly = false }: PartnerRevie
           <RefreshCw aria-hidden="true" size={15} />{isLoading ? 'Loading...' : 'Refresh'}
         </button>
       </div>
-      {readOnly && <p className="review-message review-success">VIDEO DEMO — fictional partner listings and student names. Review actions are disabled; nothing is saved.</p>}
+      {readOnly && <p className="review-message review-success">Preview mode: sample partner listings and student records. Review actions are disabled.</p>}
       {errorMessage && <p className="review-message review-error" role="alert">{errorMessage}</p>}
       {successMessage && <p className="review-message review-success" role="status">{successMessage}</p>}
       {isLoading ? (
@@ -1816,14 +1816,14 @@ export function AdminOverview({ onOpenMode }: AdminOverviewProps) {
             }}
             type="button"
           >
-            {showDemoData ? 'View live counts' : 'Use demo data'}
+            {showDemoData ? 'View live metrics' : 'Show sample metrics'}
           </button>
           <button className="workspace-secondary-button" disabled={showDemoData || isLoading || isRefreshing} onClick={() => void refreshMetrics()} type="button">
             <RefreshCw size={15} aria-hidden="true" />{isRefreshing ? 'Refreshing...' : 'Refresh counts'}
           </button>
         </div>
       </div>
-      {showDemoData && <InlineNotice kind="success">VIDEO DEMO — sample counts below are fictional, for presentation only, and are not stored in Supabase.</InlineNotice>}
+      {showDemoData && <InlineNotice kind="success">Showing sample counts. These are not live district records.</InlineNotice>}
       {errorMessage && <InlineNotice>{errorMessage}</InlineNotice>}
       <div className="admin-live-metrics">
         {[
@@ -1845,11 +1845,7 @@ export function AdminOverview({ onOpenMode }: AdminOverviewProps) {
       </div>
       {!isLoading && metrics && (showDemoData || !errorMessage) && (
         <>
-          <p className="workspace-helper">
-            {showDemoData
-              ? 'These sample counts are fictional. Switch to live counts to request aggregate totals from Supabase.'
-              : 'Counts reflect rows returned by the secured admin metrics function.'}
-          </p>
+          {!showDemoData && <p className="workspace-helper">Totals are securely aggregated from district records.</p>}
           <div className="admin-shortcuts">
             <button onClick={() => onOpenMode('student')} type="button"><Clock3 size={16} aria-hidden="true" /> Open student workspace</button>
             <button onClick={() => onOpenMode('resident')} type="button"><Wrench size={16} aria-hidden="true" /> Open resident workspace</button>

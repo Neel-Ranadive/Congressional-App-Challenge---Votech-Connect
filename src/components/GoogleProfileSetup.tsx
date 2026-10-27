@@ -47,7 +47,7 @@ function GoogleProfileSetup({ email, initialName, onComplete }: GoogleProfileSet
   return (
     <main className="auth-page">
       <section className="auth-intro" aria-labelledby="google-setup-intro">
-        <a className="brand" href="/" aria-label="VoTech Connect home">
+        <a className="brand" href={import.meta.env.BASE_URL} aria-label="VoTech Connect home">
           <span className="brand-mark" aria-hidden="true">V</span>
           <span>VoTech <strong>Connect</strong></span>
         </a>

@@ -28,7 +28,7 @@ function Auth() {
       setIsSubmitting(true)
       try {
         const { error } = await supabase.auth.resetPasswordForEmail(email.trim(), {
-          redirectTo: window.location.origin,
+          redirectTo: window.location.href,
         })
         if (error) throw error
         setStatusMessage('If an account uses that email, Supabase will send a password reset link. Check your inbox and spam folder.')
@@ -66,6 +66,7 @@ function Auth() {
           email: email.trim(),
           password,
           options: {
+            emailRedirectTo: window.location.href,
             data: {
               full_name: fullName.trim(),
               role,
@@ -109,7 +110,7 @@ function Auth() {
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: window.location.origin,
+          redirectTo: window.location.href,
         },
       })
 
@@ -133,7 +134,7 @@ function Auth() {
   return (
     <main className="auth-page">
       <section className="auth-intro" aria-labelledby="intro-title">
-        <a className="brand" href="/" aria-label="VoTech Connect home">
+        <a className="brand" href={import.meta.env.BASE_URL} aria-label="VoTech Connect home">
           <span className="brand-mark" aria-hidden="true">V</span>
           <span>VoTech <strong>Connect</strong></span>
         </a>

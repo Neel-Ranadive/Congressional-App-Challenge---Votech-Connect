@@ -54,8 +54,8 @@ const dashboardDetails = {
   },
   admin: {
     label: 'Admin dashboard',
-    description: 'Review the full district operation, switch between role perspectives, and supervise every status transition.',
-    next: 'Use this view for district oversight and cross-role verification.',
+    description: 'Review district activity and switch between role workspaces.',
+    next: '',
   },
 } as const
 
@@ -508,7 +508,7 @@ function TeacherReviewQueue({ teacherId, readOnly = false }: TeacherReviewQueueP
         </button>
       </div>
 
-      {readOnly && <p className="review-message review-success">VIDEO DEMO — fictional project, student, and hour records. Review actions are disabled; nothing is saved.</p>}
+      {readOnly && <p className="review-message review-success">Preview mode: sample projects, student records, and hours. Approvals are disabled.</p>}
       {errorMessage && <p className="review-message review-error" role="alert">{errorMessage}</p>}
       {statusMessage && <p className="review-message review-success" role="status">{statusMessage}</p>}
 
@@ -668,7 +668,7 @@ function Dashboard({ profile, onSignOut }: DashboardProps) {
   return (
     <main className="dashboard-page">
       <header className="dashboard-header">
-        <a className="dashboard-brand" href="/" aria-label="VoTech Connect home">
+        <a className="dashboard-brand" href={import.meta.env.BASE_URL} aria-label="VoTech Connect home">
           <span className="dashboard-brand-mark" aria-hidden="true">V</span>
           <span>VoTech <strong>Connect</strong></span>
         </a>
@@ -714,7 +714,7 @@ function Dashboard({ profile, onSignOut }: DashboardProps) {
           )}
           {profile.role === 'admin' && (
             <div className="admin-panel">
-            <div className="admin-mode-switch" aria-label="Admin role preview">
+            <div className="admin-mode-switch" aria-label="Admin workspaces">
               {(['overview', 'student', 'resident', 'teacher', 'industry_partner'] as const).map((mode) => (
                 <button
                   key={mode}
@@ -722,7 +722,11 @@ function Dashboard({ profile, onSignOut }: DashboardProps) {
                   onClick={() => setAdminView(mode)}
                   type="button"
                 >
-                  {mode === 'overview' ? 'Overview' : mode}
+                  {mode === 'overview'
+                    ? 'Overview'
+                    : mode === 'industry_partner'
+                      ? 'Industry partner'
+                      : mode.charAt(0).toUpperCase() + mode.slice(1)}
                 </button>
               ))}
             </div>
@@ -741,10 +745,6 @@ function Dashboard({ profile, onSignOut }: DashboardProps) {
             )}
             {adminView === 'teacher' && (
               <>
-                <p className="review-message review-success">
-                  VIDEO DEMO — fictional teacher queues for presentation only. Actions are disabled;
-                  Google Classroom is not connected in this preview.
-                </p>
                 <TeacherReviewQueue teacherId={profile.id} readOnly />
                 <PartnerReviewQueue teacherId={profile.id} readOnly />
               </>

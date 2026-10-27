@@ -42,7 +42,7 @@ function PasswordUpdate({ onUpdated }: PasswordUpdateProps) {
   return (
     <main className="password-update-page">
       <section className="password-update-card" aria-labelledby="password-update-title">
-        <a className="password-update-brand" href="/">VoTech <strong>Connect</strong></a>
+        <a className="password-update-brand" href={import.meta.env.BASE_URL}>VoTech <strong>Connect</strong></a>
         <p className="eyebrow auth-eyebrow">Account recovery</p>
         <h1 id="password-update-title">Choose a new password</h1>
         <p>Use a unique password that you do not reuse on another site.</p>
